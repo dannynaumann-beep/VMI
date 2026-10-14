@@ -1,0 +1,2307 @@
+
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Rubix Project Planning</title>
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rubix Planning">
+<meta name="theme-color" content="#051E50">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --steel-900:#051E50;
+    --steel-800:#0C2C68;
+    --steel-700:#1B3A78;
+    --steel-100:#DCE3F2;
+    --steel-050:#F2F0E9;
+    --concrete:#EDEAE2;
+    --safety:#FFDE00;
+    --safety-dark:#8A6A00;
+    --caution:#FFF3B0;
+    --go:#4C8C4A;
+    --go-bg:#E3F2E1;
+    --line:#D8D3C6;
+    --text:#0F1B2E;
+    --text-mute:#5B6472;
+    --white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--concrete); color:var(--text); font-family:'Inter',system-ui,sans-serif; min-height:100vh; -webkit-tap-highlight-color:transparent;}
+  .app{max-width:640px; margin:0 auto; min-height:100vh; background:var(--steel-050); display:flex; flex-direction:column; box-shadow:0 0 40px rgba(0,0,0,0.08); position:relative;}
+
+  /* Topbar */
+  .topbar{background:var(--steel-900); color:var(--steel-050); padding:16px 20px 14px; position:sticky; top:0; z-index:10;}
+  .topbar-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+  .back-btn{background:none; border:none; color:var(--steel-100); font-size:14.5px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px; padding:4px 0;}
+  .back-btn.hidden{visibility:hidden;}
+  .home-logo{height:75px; width:auto; display:block;}
+  .logboek-shortcut{background:none; border:none; color:var(--safety); font-size:13px; font-weight:700; cursor:pointer; text-transform:uppercase; letter-spacing:0.02em;}
+  .top-title{font-family:'Oswald',sans-serif; font-size:20px; font-weight:600; text-transform:uppercase; letter-spacing:0.01em; margin:0;}
+  .top-sub{font-family:'Roboto Mono',monospace; font-size:11px; color:var(--steel-100); opacity:0.75; margin-top:3px;}
+  .rungs{display:flex; gap:5px; margin-top:12px;}
+  .rung{flex:1; height:6px; background:rgba(255,255,255,0.14); border-radius:2px; position:relative; overflow:hidden;}
+  .rung::after{content:''; position:absolute; inset:0; background:var(--safety); transform:scaleX(0); transform-origin:left; transition:transform .3s ease; border-radius:2px;}
+  .rung.done::after{transform:scaleX(1);}
+  .rung.current::after{transform:scaleX(1); background:var(--caution);}
+
+  .content{flex:1; padding:20px 20px 110px;}
+  h1.title{font-family:'Oswald',sans-serif; font-size:21px; font-weight:600; text-transform:uppercase; margin:0 0 4px; color:var(--steel-900);}
+  p.sub{color:var(--text-mute); font-size:14px; margin:0 0 20px; line-height:1.4;}
+
+  /* Dashboard */
+  .dashboard{margin:2px 0 22px;}
+  .dashboard-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:12px;}
+  .dashboard-head h2{font-family:'Oswald',sans-serif;font-size:19px;text-transform:uppercase;color:var(--steel-900);margin:0;}
+  .dashboard-updated{font-size:11px;color:var(--text-mute);text-align:right;}
+  .kpi-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px;}
+  .kpi-card{background:var(--white);border:1.5px solid var(--line);border-radius:12px;padding:14px;min-height:91px;}
+  .kpi-card.attention{border-color:#C0392B;background:#FDF3F2;}
+  .kpi-card.success{border-color:var(--go);background:#F4FAF4;}
+  .kpi-value{font-family:'Oswald',sans-serif;font-size:30px;line-height:1;color:var(--steel-900);font-weight:700;}
+  .kpi-label{font-size:12px;color:var(--text-mute);font-weight:700;margin-top:7px;text-transform:uppercase;letter-spacing:.02em;}
+  .dashboard-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+  .dash-panel{background:var(--white);border:1.5px solid var(--line);border-radius:12px;padding:15px;}
+  .dash-panel h3{font-family:'Oswald',sans-serif;font-size:14px;text-transform:uppercase;color:var(--steel-800);margin:0 0 10px;}
+  .dash-panel.danger{border-color:#C0392B;}
+  .dash-empty{font-size:13px;color:var(--text-mute);margin:0;line-height:1.45;}
+  .action-card{border-top:1px solid var(--line);padding:11px 0;}
+  .action-card:first-of-type{border-top:none;padding-top:0;}
+  .action-title{font-size:14px;font-weight:700;color:var(--text);line-height:1.35;}
+  .action-meta{font-size:12px;color:var(--text-mute);margin-top:4px;line-height:1.4;}
+  .action-status{display:inline-block;margin-top:6px;font-size:10px;font-weight:700;text-transform:uppercase;padding:4px 7px;border-radius:12px;background:var(--caution);color:var(--safety-dark);}
+  .action-status.danger{background:#F8D7D4;color:#8E2A20;}
+  .dash-link{border:none;background:none;color:var(--steel-800);font-weight:700;font-size:12px;padding:0;cursor:pointer;text-decoration:underline;}
+  .planning-line,.workload-line{display:grid;grid-template-columns:72px 1fr;gap:9px;border-top:1px solid var(--line);padding:9px 0;font-size:13px;}
+  .planning-line:first-of-type,.workload-line:first-of-type{border-top:none;padding-top:0;}
+  .planning-date{font-weight:700;color:var(--steel-800);}
+  .planning-customer{font-weight:700;}
+  .planning-detail{color:var(--text-mute);font-size:12px;margin-top:2px;}
+  .workload-line{grid-template-columns:1fr auto;}
+  .workload-count{font-weight:700;color:var(--steel-800);}
+  .dashboard-error{background:#FDF3F2;border:1.5px solid #C0392B;color:#8E2A20;border-radius:10px;padding:12px;font-size:13px;}
+  @media(min-width:560px){.kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr));}.dashboard-grid{grid-template-columns:1fr 1fr;}.dash-panel.span-2{grid-column:1/-1;}}
+  /* Home tiles */
+  .tiles{display:flex; flex-direction:column; gap:14px; margin-top:6px;}
+  .tile{background:var(--white); border:1.5px solid var(--line); border-radius:14px; padding:20px; display:flex; align-items:center; gap:16px; cursor:pointer; text-align:left;}
+  .tile:active{background:var(--steel-050);}
+  .tile .tile-icon{width:50px; height:50px; border-radius:12px; background:var(--steel-900); color:var(--safety); display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;}
+  .tile .tile-text h3{margin:0 0 3px; font-family:'Oswald',sans-serif; font-size:16px; text-transform:uppercase; color:var(--steel-900);}
+  .tile .tile-text p{margin:0; font-size:13px; color:var(--text-mute);}
+  .logboek-tile{background:transparent; border:1.5px dashed var(--line); color:var(--text-mute); font-weight:600; font-size:14px; padding:16px; border-radius:12px; text-align:center; cursor:pointer; margin-top:6px;}
+
+  .setup-banner{background:#FFF3B0; border:1.5px solid #E6C200; color:#5C4A00; border-radius:10px; padding:12px 14px; font-size:13px; line-height:1.5; margin-bottom:18px;}
+  .setup-banner b{display:block; margin-bottom:3px; font-size:13.5px;}
+  /* Read-only medewerkersplanning */
+  .planning-section{margin-top:18px;}
+  .planning-table-wrap{overflow-x:auto; border:1.5px solid var(--line); border-radius:10px; background:var(--white);}
+  .planning-table{width:100%; min-width:560px; border-collapse:collapse; font-size:12.5px;}
+  .planning-table th{background:var(--steel-900); color:var(--white); padding:10px 9px; text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:0.03em; white-space:nowrap;}
+  .planning-table td{padding:10px 9px; border-top:1px solid var(--line); vertical-align:top; line-height:1.35;}
+  .planning-table tbody tr:nth-child(even){background:var(--steel-050);}
+  .planning-table .planning-duration{text-align:center; white-space:nowrap;}
+  .planning-empty{margin:0; color:var(--text-mute); font-size:13.5px;}
+
+  /* Fields */
+  .field{margin-bottom:15px;}
+  .field label{display:block; font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.03em; color:var(--text-mute); margin-bottom:6px;}
+  .field input, .field textarea, .field select{width:100%; padding:12.5px 14px; border:1.5px solid var(--line); border-radius:8px; background:var(--white); font-family:'Inter',sans-serif; font-size:15.5px; color:var(--text); outline:none;}
+  .field input:focus, .field textarea:focus, .field select:focus{border-color:var(--safety-dark);}
+  .field textarea{resize:vertical; min-height:70px;}
+  .field select{padding:12.5px 14px;border:1.5px solid var(--line);border-radius:8px;background:var(--white);font-family:'Inter',sans-serif;font-size:15.5px;color:var(--text);outline:none;}
+  .field-row{display:flex; gap:12px;}
+  .field-row .field{flex:1;}
+  .field input.invalid, .field textarea.invalid{border-color:#C0392B; background:#FDF3F2;}
+  .error-banner{background:#FDF3F2; border:1.5px solid #C0392B; color:#8E2A20; border-radius:8px; padding:11px 14px; font-size:13.5px; font-weight:600; margin-bottom:16px; display:none;}
+  .error-banner.show{display:block;}
+
+  /* Chips + task rows */
+  .chip-row{display:flex; flex-wrap:wrap; gap:7px; margin:6px 0 18px;}
+  .chip{background:var(--white); border:1.5px solid var(--line); border-radius:20px; padding:7px 12px; font-size:12.5px; font-weight:600; cursor:pointer; color:var(--steel-800);}
+  .chip:active{background:var(--steel-100);}
+  .section-label{font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.03em; color:var(--text-mute); margin-bottom:8px;}
+  .task-row{display:flex; align-items:center; justify-content:space-between; gap:10px; background:var(--white); border:1.5px solid var(--line); border-radius:9px; padding:11px 13px; margin-bottom:8px;}
+  .task-row span{font-size:14.5px; line-height:1.3;}
+  .task-row button{background:none; border:none; color:var(--text-mute); font-size:18px; cursor:pointer; padding:0 2px; flex-shrink:0;}
+  .inline-add-row{background:var(--white); border:1.5px solid var(--line); border-radius:10px; padding:12px; margin-bottom:14px;}
+  .inline-add-row input{width:100%; padding:11px 12px; border:1.5px solid var(--line); border-radius:7px; font-size:15px; margin-bottom:8px; font-family:'Inter',sans-serif;}
+  .inline-add-row .row-btns{display:flex; gap:8px;}
+  .inline-add-row .row-btns button{flex:1; padding:10px; border-radius:7px; border:none; font-weight:700; font-size:13.5px; cursor:pointer;}
+  .save-add{background:var(--safety); color:var(--steel-900);}
+  .cancel-add{background:var(--steel-050); color:var(--text-mute);}
+  .add-item-btn{width:100%; padding:13px; border:2px dashed var(--line); border-radius:10px; background:transparent; color:var(--text-mute); font-size:14px; font-weight:600; cursor:pointer; margin-bottom:8px;}
+
+  /* Photos */
+  .photo-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:10px 0 6px;}
+  .photo-thumb{position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; background:var(--steel-050); border:1px solid var(--line); cursor:pointer;}
+  .photo-thumb img{width:100%; height:100%; object-fit:cover; display:block;}
+  .photo-thumb .rm{position:absolute; top:4px; right:4px; width:22px; height:22px; background:rgba(15,27,46,0.75); color:white; border:none; border-radius:50%; font-size:12px; cursor:pointer; line-height:1;}
+  .photo-add-btns{display:flex; gap:10px; margin-bottom:6px;}
+  .photo-add-btns button{flex:1; padding:12px; border:1.5px dashed var(--line); background:var(--concrete); border-radius:9px; font-size:13px; font-weight:600; color:var(--text-mute); cursor:pointer;}
+  .photo-hint{font-size:11.5px; color:var(--text-mute); margin-bottom:16px;}
+
+  /* Checklist (reuse) */
+  .check-item{background:var(--white); border:1.5px solid var(--line); border-radius:10px; padding:14px 14px 12px; margin-bottom:12px;}
+  .check-item.checked{border-color:var(--go); background:#F4FAF4;}
+  .check-head{display:flex; align-items:flex-start; gap:12px; cursor:pointer;}
+  .checkbox{width:26px; height:26px; min-width:26px; border:2px solid var(--steel-700); border-radius:6px; display:flex; align-items:center; justify-content:center; background:var(--white); margin-top:1px;}
+  .check-item.checked .checkbox{background:var(--go); border-color:var(--go);}
+  .checkbox svg{width:16px; height:16px; opacity:0;}
+  .check-item.checked .checkbox svg{opacity:1;}
+  .check-text{flex:1; font-size:15px; font-weight:500; line-height:1.35; padding-top:2px;}
+  .check-note-label{font-size:11px; color:var(--text-mute); margin:10px 0 5px 38px; text-transform:uppercase; letter-spacing:0.02em; font-weight:600;}
+  .check-note{margin-left:38px;}
+  .check-note textarea{width:100%; border:1.5px solid var(--line); border-radius:7px; padding:9px 10px; font-size:14px; font-family:'Inter',sans-serif; min-height:40px; resize:vertical; background:var(--steel-050);}
+
+  /* Signature */
+  .sig-wrap{background:var(--white); border:1.5px solid var(--line); border-radius:10px; padding:14px; margin-bottom:20px;}
+  .sig-title{font-family:'Oswald',sans-serif; font-size:14px; font-weight:600; text-transform:uppercase; color:var(--steel-800); margin-bottom:10px;}
+  canvas.pad{width:100%; height:150px; background:#FBFAF6; border:1.5px dashed var(--line); border-radius:8px; touch-action:none; display:block;}
+  .sig-actions{display:flex; justify-content:space-between; align-items:center; margin-top:8px;}
+  .clear-btn{background:none; border:none; color:var(--safety-dark); font-size:13px; font-weight:600; cursor:pointer;}
+  .sig-hint{font-size:12px; color:var(--text-mute);}
+
+  /* Cards / lists */
+  .project-card, .log-card{background:var(--white); border:1.5px solid var(--line); border-radius:11px; padding:14px 16px; margin-bottom:11px; cursor:pointer;}
+  .project-card:active, .log-card:active{background:var(--steel-050);}
+  .pc-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .pc-name{font-weight:700; font-size:15.5px;}
+  .pc-addr{font-size:13px; color:var(--text-mute); margin-top:2px;}
+  .badge{font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.03em; padding:4px 9px; border-radius:20px; white-space:nowrap; flex-shrink:0;}
+  .badge.open{background:var(--caution); color:var(--safety-dark);}
+  .badge.done{background:var(--go-bg); color:#2E6B2C;}
+  .pc-meta{font-size:12px; color:var(--text-mute); margin-top:9px;}
+  .top-actions{display:flex; justify-content:flex-end; margin-bottom:14px;}
+  .small-btn{background:var(--steel-900); color:var(--safety); border:none; padding:11px 16px; border-radius:8px; font-size:13.5px; font-weight:700; cursor:pointer;}
+  .danger-btn{background:#B42318; color:var(--white); border:none; padding:11px 16px; border-radius:8px; font-size:13.5px; font-weight:700; cursor:pointer;}
+  .delete-project-card{cursor:default;}
+  .delete-project-actions{display:flex;justify-content:flex-end;margin-top:12px;}
+  .delete-project-message{margin-bottom:14px;padding:11px 13px;border-radius:8px;font-size:13px;display:none;}
+  .delete-project-message.show{display:block;}
+  .delete-project-message.success{background:var(--go-bg);color:#2E6B2C;border:1.5px solid var(--go);}
+  .delete-project-message.error{background:#FDF3F2;color:#8E2A20;border:1.5px solid #C0392B;}
+
+  .empty-state{text-align:center; padding:50px 20px; color:var(--text-mute);}
+  .empty-state .ic{font-size:36px; margin-bottom:10px;}
+  .empty-state p{font-size:14px; line-height:1.5;}
+
+  .detail-section{background:var(--white); border:1.5px solid var(--line); border-radius:11px; padding:16px; margin-bottom:14px;}
+  .detail-section h3{font-family:'Oswald',sans-serif; font-size:12px; text-transform:uppercase; letter-spacing:0.03em; color:var(--text-mute); margin:0 0 10px;}
+  .detail-row{display:flex; justify-content:space-between; gap:10px; font-size:14.5px; padding:5px 0; border-top:1px solid var(--steel-050);}
+  .detail-row:first-of-type{border-top:none;}
+  .detail-row span:first-child{color:var(--text-mute); flex-shrink:0;}
+  .detail-row span:last-child{font-weight:600; text-align:right;}
+  .contact-link{color:var(--steel-800); text-decoration:none; font-weight:600;}
+  .task-list-view{font-size:14px; line-height:1.9;}
+  .task-list-view .done-mark{color:#2E6B2C;}
+  .task-list-view .miss-mark{color:var(--safety-dark);}
+  .ov-sig-img{width:100%; max-height:75px; object-fit:contain; background:var(--steel-050); border-radius:6px; margin-top:6px;}
+  .loading-txt{text-align:center; padding:40px 0; color:var(--text-mute); font-size:14px;}
+  .project-card,.log-card,.dash-panel,.detail-section{content-visibility:auto;contain-intrinsic-size:1px 140px;}
+
+.visits-container{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  width:100%;
+}
+.visits-container > .detail-section{
+  width:100%;
+  margin-bottom:0;
+}
+
+  /* Bottom bar */
+  .bottombar{position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:640px; background:var(--white); border-top:1.5px solid var(--line); padding:14px 20px calc(14px + env(safe-area-inset-bottom)); display:none; gap:10px; z-index:10;}
+  .bottombar.show{display:flex;}
+  .btn{flex:1; padding:15px 18px; border-radius:9px; border:none; font-family:'Inter',sans-serif; font-size:15px; font-weight:700; cursor:pointer; text-transform:uppercase; letter-spacing:0.02em;}
+  .btn:active{transform:scale(0.98);}
+  .btn.primary{background:var(--safety); color:var(--steel-900);}
+  .btn.primary:disabled{background:#D9D4C6; color:#9B968A;}
+  .btn.ghost{background:var(--steel-050); color:var(--steel-800); flex:0 0 100px;}
+  .btn.wide{flex:1;}
+
+  .success-wrap{text-align:center; padding-top:30px;}
+  .success-icon{width:70px; height:70px; border-radius:50%; background:var(--go); color:white; display:flex; align-items:center; justify-content:center; margin:0 auto 18px;}
+  .success-icon svg{width:34px; height:34px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="topbar-nav">
+      <button class="back-btn" id="backBtn" onclick="goBack()">‹ Terug</button>
+      <img class="home-logo" id="homeLogo" src="" alt="Rubix" onclick="setView('home')" style="cursor:pointer;">
+      <button class="logboek-shortcut" id="logboekShortcut" onclick="setView('logboekList')">📒 Logboek</button>
+    </div>
+    <h1 class="top-title" id="topTitle">Rubix Project Planning</h1>
+    <div class="top-sub" id="topSub" style="display:none;"></div>
+    <div class="rungs" id="rungs" style="display:none;"></div>
+  </div>
+
+  <div class="content" id="content"></div>
+
+  <div class="bottombar" id="bottombar">
+    <button class="btn ghost" id="barBackBtn">Terug</button>
+    <button class="btn primary wide" id="barNextBtn">Volgende</button>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   CONFIG
+========================================================= */
+const API_URL = "https://default7e7582b6e2aa455c8352be9fd4a411.dd.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/01/workflows/e38a7746c95f445f8c47e5c772eece2e/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=I_PRujJfgfVdnzEIzGvdOdsqEkrX6xHeDL4Ya3nChx4"; // <--  Power Automate HTTP-URL 
+const LOCAL_MODE = !API_URL;
+let localProjects = [];
+let localLogboek=[];
+let APP_ROLE = null;
+let APP_READY = false;
+const ROLE_PASSWORDS = Object.freeze({
+  manager: 'pm',
+  vmi: 'pm'
+});
+function managerAllowed(){return APP_ROLE==='manager';}
+
+/* =========================================================
+   LOGO
+========================================================= */
+document.getElementById('homeLogo').src = "data:image/png;base64,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vLDwG/eE8/s3BCkeAAAACXBIWXMAAC4jAAAuIwF4pT92AAADcGlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSfvu78nIGlkPSdXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQnPz4NCjx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iPjxyZGY6UkRGIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+PHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9InV1aWQ6ZmFmNWJkZDUtYmEzZC0xMWRhLWFkMzEtZDMzZDc1MTgyZjFiIiB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iPjxkYzpjcmVhdG9yPjxyZGY6U2VxIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyI+PHJkZjpsaT5NYXJ0aWpuIEViYmVsaW5rPC9yZGY6bGk+PC9yZGY6U2VxPg0KCQkJPC9kYzpjcmVhdG9yPjwvcmRmOkRlc2NyaXB0aW9uPjxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PSJ1dWlkOmZhZjViZGQ1LWJhM2QtMTFkYS1hZDMxLWQzM2Q3NTE4MmYxYiIgeG1sbnM6ZXhpZj0iaHR0cDovL25zLmFkb2JlLmNvbS9leGlmLzEuMC8iPjxleGlmOkRhdGVUaW1lT3JpZ2luYWw+MjAyNi0wOC0wNVQwOToyNDozMS4yNDY8L2V4aWY6RGF0ZVRpbWVPcmlnaW5hbD48L3JkZjpEZXNjcmlwdGlvbj48cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0idXVpZDpmYWY1YmRkNS1iYTNkLTExZGEtYWQzMS1kMzNkNzUxODJmMWIiIHhtbG5zOnhtcD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wLyI+PHhtcDpDcmVhdGVEYXRlPjIwMjYtMDgtMDVUMDk6MjQ6MzEuMjQ2PC94bXA6Q3JlYXRlRGF0ZT48L3JkZjpEZXNjcmlwdGlvbj48L3JkZjpSREY+PC94OnhtcG1ldGE+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";
+
+/* =========================================================
+   PERFORMANCE: DEBOUNCE, MEMORY CACHE & LAZY LOADERS
+========================================================= */
+function debounce(fn, delay = 300){
+  let timer;
+  return function(...args){
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this,args), delay);
+  };
+}
+const DATA_CACHE_TTL = 5 * 60 * 1000;
+const DATA_CACHE = {projects:null,projectsLoadedAt:0,projectsPromise:null,logboek:null,logboekLoadedAt:0,logboekPromise:null};
+function cacheFresh(value){return value > 0 && Date.now()-value < DATA_CACHE_TTL;}
+const REFERENCE_LOADERS={managers:null,medewerkers:null,taken:null,kalender:null};
+function ensureProjectManagersLoaded(){return REFERENCE_LOADERS.managers ||= loadProjectManagers();}
+function ensureVMIMedewerkersLoaded(){return REFERENCE_LOADERS.medewerkers ||= loadVMIMedewerkers();}
+function ensureVMITakenLoaded(){return REFERENCE_LOADERS.taken ||= loadVMITaken();}
+async function ensureKalenderLoaded(force = false) {
+  if (!force && Array.isArray(KALENDER_DATA) && KALENDER_DATA.length > 0) {
+    return KALENDER_DATA;
+  }
+  return await loadKalender();
+}
+
+/* =========================================================
+   STORAGE LAYER
+========================================================= */
+const PROJECTS_STORAGE_KEY = 'rubix_projects_v1';
+const LOGBOEK_STORAGE_KEY = 'rubix_logboek_v1';
+
+function parseArray(value){
+  if(Array.isArray(value)) return value;
+  if(typeof value !== 'string' || !value.trim()) return [];
+  try{
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  }catch(e){
+    console.warn('Ongeldige arraywaarde ontvangen:', value, e);
+    return [];
+  }
+}
+
+function normalizeProject(project){
+  if(!project || typeof project !== 'object') return null;
+  return {
+    ...project,
+    id: String(project.id ?? project.ProjectId ?? ''),
+    klantNaam: String(project.klantNaam ?? ''),
+    adres:String(project.adres??''),
+    datumStart: String(project.datumStart ?? ''),
+    datumEind: String(project.datumEind ?? ''),
+    opmerkingenVooraf: String(project.opmerkingenVooraf ?? ''),
+    startTijdLocatie:String(project.startTijdLocatie??''),
+    contactNaam: String(project.contactNaam ?? ''),
+    contactTelefoon: String(project.contactTelefoon ?? ''),
+    contactEmail: String(project.contactEmail ?? ''),
+    projectManagerNaam:String(project.projectManagerNaam??''),
+    projectManagerEmail:String(project.projectManagerEmail??''),
+    rubixContactNaam: String(project.rubixContactNaam ?? ''),
+    werkzaamheden: parseArray(project.werkzaamheden),
+    monteurs: parseArray(project.monteurs),
+    hotelNodig: project.hotelNodig === true || project.hotelNodig === 'true' || project.hotelNodig === 1,
+    hotelNaam: String(project.hotelNaam ?? ''),
+    hotelAdres: String(project.hotelAdres ?? ''),
+    hotelOpmerkingen: String(project.hotelOpmerkingen ?? ''),
+    status: String(project.status ?? 'open'),
+    createdAt: String(project.createdAt ?? ''),
+    fotos: parseArray(project.fotos)
+  };
+}
+
+function normalizeLogboekEntry(entry){
+  if(!entry || typeof entry !== 'object') return null;
+  return {
+    ...entry,
+    id: String(entry.id ?? ''),
+    projectId: String(entry.projectId ??
+	entry.ProjectId ??
+	entry.projectID ??
+	entry.ProjectID ??
+	''),
+    checklist:parseArray(entry.checklist),
+    datumStart:String(entry.datumStart??entry.datum??''),
+    datumEind:String(entry.datumEind??entry.datumStart??entry.datum??''),
+    opmerkingenKlant:String(entry.opmerkingenKlant??''),
+    fotos:parseArray(entry.fotos),
+    klantOndertekenaar:String(entry.klantOndertekenaar??entry.klantNaam??''),
+    projectManagerEmail:String(entry.projectManagerEmail??'')
+  };
+}
+
+function readStorage(key){
+  try{
+    const raw = localStorage.getItem(key);
+    if(!raw) return [];
+    const value = JSON.parse(raw);
+    return Array.isArray(value) ? value : [];
+  }catch(e){
+    console.error(`Browseropslag kon niet worden gelezen voor ${key}:`, e);
+    return [];
+  }
+}
+
+function writeStorage(key, value){
+  try{
+    localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  }catch(e){
+    console.error(`Browseropslag kon niet worden bijgewerkt voor ${key}:`, e);
+    return false;
+  }
+}
+
+function getStoredProjects(){
+  return readStorage(PROJECTS_STORAGE_KEY).map(normalizeProject).filter(Boolean);
+}
+
+function storeProjects(projects){
+  const normalized = (Array.isArray(projects) ? projects : []).map(normalizeProject).filter(Boolean);
+  if(writeStorage(PROJECTS_STORAGE_KEY, normalized)) return true;
+
+  // Base64-foto's kunnen de limiet van localStorage overschrijden.
+  // Bewaar in dat geval de projectgegevens zonder foto's als offline cache.
+  const withoutPhotos = normalized.map(project => ({ ...project, fotos: [] }));
+  const saved = writeStorage(PROJECTS_STORAGE_KEY, withoutPhotos);
+  if(saved) console.warn('Projecten lokaal opgeslagen zonder foto’s omdat de browseropslag vol is.');
+  return saved;
+}
+
+function getStoredLogboek(){
+  return readStorage(LOGBOEK_STORAGE_KEY).map(normalizeLogboekEntry).filter(Boolean);
+}
+
+function storeLogboek(entries){
+  const normalized = (Array.isArray(entries) ? entries : []).map(normalizeLogboekEntry).filter(Boolean);
+  return writeStorage(LOGBOEK_STORAGE_KEY, normalized);
+}
+
+async function apiCall(action, payload = {}){
+  if(!API_URL) throw new Error('API_URL ontbreekt.');
+
+  let response;
+  try{
+    response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ action, data: payload })
+    });
+  }catch(e){
+    console.error(`Netwerkfout bij ${action}:`, e);
+    throw new Error('De verbinding met Power Automate is mislukt.');
+  }
+
+  const responseText = await response.text();
+  if(!response.ok){
+    console.error(`Power Automate-fout ${response.status}:`, responseText);
+    throw new Error(`Power Automate gaf HTTP-status ${response.status}.`);
+  }
+  if(!responseText.trim()) return {};
+
+  try{
+    const data = JSON.parse(responseText);
+    console.log(`API-antwoord voor ${action}:`, data);
+    return data;
+  }catch(e){
+    console.error('Power Automate gaf geen geldige JSON terug:', responseText);
+    throw new Error('Power Automate gaf geen geldige JSON terug.');
+  }
+}
+
+function extractCollection(responseData, propertyName){
+  if(Array.isArray(responseData)) return responseData;
+  if(Array.isArray(responseData?.[propertyName])) return responseData[propertyName];
+  if(Array.isArray(responseData?.body?.[propertyName])) return responseData.body[propertyName];
+  if(typeof responseData?.body === 'string'){
+    try{
+      const body = JSON.parse(responseData.body);
+      if(Array.isArray(body)) return body;
+      if(Array.isArray(body?.[propertyName])) return body[propertyName];
+    }catch(e){
+      console.warn('Response-body is geen geldige JSON:', e);
+    }
+  }
+  return [];
+}
+
+async function getProjects(options={}){
+  const forceRefresh=options.forceRefresh===true;
+  if(!forceRefresh&&Array.isArray(DATA_CACHE.projects)&&cacheFresh(DATA_CACHE.projectsLoadedAt)) return DATA_CACHE.projects;
+  if(!forceRefresh&&DATA_CACHE.projectsPromise) return DATA_CACHE.projectsPromise;
+  DATA_CACHE.projectsPromise=(async()=>{
+    if(LOCAL_MODE){const x=getStoredProjects().sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));DATA_CACHE.projects=x;DATA_CACHE.projectsLoadedAt=Date.now();return x;}
+    try{
+      const r=await apiCall('getProjects',{});
+      const x=extractCollection(r,'projects').map(normalizeProject).filter(Boolean).sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+      DATA_CACHE.projects=x;DATA_CACHE.projectsLoadedAt=Date.now();storeProjects(x);return x;
+    }catch(e){const x=getStoredProjects();if(x.length){DATA_CACHE.projects=x;DATA_CACHE.projectsLoadedAt=Date.now();return x;}throw e;}
+    finally{DATA_CACHE.projectsPromise=null;}
+  })();
+  return DATA_CACHE.projectsPromise;
+}
+async function getProjectById(id){
+  const memoryProject=Array.isArray(DATA_CACHE.projects)?DATA_CACHE.projects.find(p=>String(p.id)===String(id))||null:null;
+  if(memoryProject&&cacheFresh(DATA_CACHE.projectsLoadedAt)) return memoryProject;
+  const cached=memoryProject||getStoredProjects().find(p=>String(p.id)===String(id))||null;
+  if(LOCAL_MODE) return cached;
+  try{
+    const r = await apiCall('getProject', { id });
+    let raw = r?.project ?? r?.body?.project ?? null;
+    if(!raw && typeof r?.body === 'string'){
+      try{ raw = JSON.parse(r.body)?.project ?? null; }catch(e){}
+    }
+    const project = normalizeProject(raw);
+    if(!project) return cached;
+    const projects = getStoredProjects();
+    const index = projects.findIndex(p => String(p.id) === String(project.id));
+    if(index >= 0) projects[index] = project; else projects.push(project);
+    storeProjects(projects);
+    DATA_CACHE.projects=projects; DATA_CACHE.projectsLoadedAt=Date.now();
+    return project;
+  }catch(e){
+    if(cached){
+      console.warn('API niet beschikbaar. Lokaal project wordt gebruikt.', e);
+      return cached;
+    }
+    throw e;
+  }
+}
+
+// Schrijft een project naar de lokale cache (upsert op id).
+function upsertLocalProject(normalized){
+  const projects = getStoredProjects();
+  const index = projects.findIndex(p => String(p.id) === String(normalized.id));
+  if(index >= 0) projects[index] = normalized; else projects.push(normalized);
+  storeProjects(projects);
+}
+
+// NIEUW project aanmaken -> Power Automate-actie 'createProject' (maakt een nieuw item).
+async function createProject(project){
+  const normalized = normalizeProject(project);
+  if(!normalized) throw new Error('Ongeldige projectgegevens.');
+  if(!normalized.createdAt) normalized.createdAt = new Date().toISOString();
+
+  upsertLocalProject(normalized);
+
+  if(!LOCAL_MODE) await apiCall('createProject', { project: normalized });
+  return normalized;
+}
+
+// BESTAAND project wijzigen -> Power Automate-actie 'updateProject' (werkt bestaand item bij).
+// Stuurt het volledige project mee inclusief 'id' en 'createdAt' zodat de flow het juiste
+// SharePoint-item kan terugvinden en bijwerken in plaats van een nieuw item te maken.
+async function updateProject(project){
+  const normalized = normalizeProject(project);
+  if(!normalized) throw new Error('Ongeldige projectgegevens.');
+  if(!normalized.id) throw new Error('Project-id ontbreekt; bijwerken niet mogelijk.');
+  normalized.modifiedAt = new Date().toISOString();
+
+  upsertLocalProject(normalized);
+
+  if(!LOCAL_MODE) await apiCall('updateProject', { project: normalized });
+  return normalized;
+}
+
+// Compat-helper: kiest automatisch create of update op basis van of het project al bestaat.
+async function saveProject(project, forceCreate){
+  const normalized = normalizeProject(project);
+  if(!normalized) throw new Error('Ongeldige projectgegevens.');
+  const exists = !forceCreate &&
+    !!normalized.id &&
+    getStoredProjects().some(p => String(p.id) === String(normalized.id));
+  return exists ? updateProject(normalized) : createProject(normalized);
+}
+
+
+
+async function deleteProject(id){
+  const remaining=getStoredProjects().filter(p=>String(p.id)!==String(id));
+  storeProjects(remaining); DATA_CACHE.projects=remaining; DATA_CACHE.projectsLoadedAt=Date.now();
+  if(!LOCAL_MODE) await apiCall('deleteProject', { id });
+}
+
+async function getLogboek(options={}){
+  const forceRefresh=options.forceRefresh===true;
+  if(!forceRefresh&&Array.isArray(DATA_CACHE.logboek)&&cacheFresh(DATA_CACHE.logboekLoadedAt)) return DATA_CACHE.logboek;
+  if(!forceRefresh&&DATA_CACHE.logboekPromise) return DATA_CACHE.logboekPromise;
+  DATA_CACHE.logboekPromise=(async()=>{
+    if(LOCAL_MODE){const x=getStoredLogboek().sort((a,b)=>String(b.completedAt).localeCompare(String(a.completedAt)));DATA_CACHE.logboek=x;DATA_CACHE.logboekLoadedAt=Date.now();return x;}
+    try{
+      const r=await apiCall('getLogboek',{});
+      const x=extractCollection(r,'entries').map(normalizeLogboekEntry).filter(Boolean).sort((a,b)=>String(b.completedAt).localeCompare(String(a.completedAt)));
+      DATA_CACHE.logboek=x;DATA_CACHE.logboekLoadedAt=Date.now();storeLogboek(x);return x;
+    }catch(e){const x=getStoredLogboek();if(x.length){DATA_CACHE.logboek=x;DATA_CACHE.logboekLoadedAt=Date.now();return x;}throw e;}
+    finally{DATA_CACHE.logboekPromise=null;}
+  })();
+  return DATA_CACHE.logboekPromise;
+}
+async function saveLogboekEntry(entry){
+  const normalized = normalizeLogboekEntry(entry);
+  if(!normalized) throw new Error('Ongeldige logboekgegevens.');
+
+  const entries = getStoredLogboek();
+  const index = entries.findIndex(item => String(item.id) === String(normalized.id));
+  if(index >= 0) entries[index] = normalized; else entries.push(normalized);
+  storeLogboek(entries);
+
+  if(!LOCAL_MODE) await apiCall('saveLogboekEntry', { entry: normalized });
+  return normalized;
+}
+
+/* =========================================================
+   HELPERS
+========================================================= */
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function openLightbox(src){
+  if(!src) return;
+  const overlay = document.createElement('div');
+  overlay.id = 'lightboxOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(5,15,35,0.94);z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;';
+  overlay.onclick = closeLightbox;
+  const img = document.createElement('img');
+  img.src = src;
+  img.style.cssText = 'max-width:100%;max-height:100%;border-radius:8px;box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕';
+  closeBtn.style.cssText = 'position:fixed;top:18px;right:18px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.15);color:white;border:none;font-size:18px;cursor:pointer;';
+  closeBtn.onclick = closeLightbox;
+  overlay.appendChild(img);
+  overlay.appendChild(closeBtn);
+  document.body.appendChild(overlay);
+}
+function closeLightbox(){ const el = document.getElementById('lightboxOverlay'); if(el) el.remove(); }
+function escapeHtml(str){ const d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+function todayISO(){ const d = new Date(); const pad = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function formatDate(iso){ if(!iso) return '—'; const [y,m,d] = iso.split('-'); return `${d}-${m}-${y}`; }
+function formatDateRange(start, end){
+  if(!start) return '—';
+  if(!end || end === start) return formatDate(start);
+  return `${formatDate(start)} t/m ${formatDate(end)}`;
+}
+function val(id){ const el = document.getElementById(id); return el ? el.value : ''; }
+
+function compressImage(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        const maxDim = 1280;
+        if(width > maxDim || height > maxDim){
+          if(width > height){ height = Math.round(height * maxDim / width); width = maxDim; }
+          else { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+/* ophalen projectmanagers power automate */
+let PROJECT_MANAGERS = [];
+async function loadProjectManagers() {
+    try {
+        const RPM = await apiCall('GetVMIManager');
+        PROJECT_MANAGERS = RPM?.body?.Entry || RPM?.Entry || [];
+
+        console.log('Projectmanagers geladen', PROJECT_MANAGERS);
+    } catch (e) {
+        console.error('Projectmanagers laden mislukt', e);
+        PROJECT_MANAGERS = [];
+    }
+}
+
+/* ophalen VMImedewerkers power automate*/
+let VMI_MEDEWERKERS = [];
+async function loadVMIMedewerkers() {
+    try {
+        const RPM = await apiCall('GetVMIMedewerkers');
+        VMI_MEDEWERKERS = RPM?.body?.Entry || RPM?.Entry || [];
+
+        console.log('MedewerkersVMI geladen', VMI_MEDEWERKERS);
+    } catch (e) {
+        console.error('medewerkersVMI laden mislukt', e);
+        VMI_MEDEWERKERS = [];
+    }
+}
+
+/* ophalen VMITaken power automate*/
+let DEFAULT_TASKS = [];
+async function loadVMITaken() {
+    try {
+        const RPM = await apiCall('GetVMITaken');
+        DEFAULT_TASKS = RPM?.body?.Entry || RPM?.Entry || [];
+
+        console.log('TakenVMI geladen', DEFAULT_TASKS);
+    } catch (e) {
+        console.error('TakenVMI laden mislukt', e);
+        DEFAULT_TASKS = [];
+    }
+}
+
+/* ophalen medewerkersplanning power automate */
+let KALENDER_DATA = [];
+async function loadKalender() {
+  console.log('Kalender: GetKalender2 starten...');
+
+  try {
+    const response = await apiCall('GetKalender2', {});
+    console.log('Kalender RAW response:', response);
+
+    let data = [];
+    const candidates = [
+      response,
+      response?.Entry,
+      response?.entry,
+      response?.value,
+      response?.body,
+      response?.body?.Entry,
+      response?.body?.entry,
+      response?.body?.value,
+      response?.body?.body,
+      response?.body?.body?.Entry,
+      response?.body?.body?.entry,
+      response?.body?.body?.value
+    ];
+
+    data = candidates.find(Array.isArray) || [];
+
+    if (!data.length && typeof response?.body === 'string') {
+      try {
+        const parsedBody = JSON.parse(response.body);
+        const bodyCandidates = [
+          parsedBody,
+          parsedBody?.Entry,
+          parsedBody?.entry,
+          parsedBody?.value,
+          parsedBody?.body,
+          parsedBody?.body?.Entry,
+          parsedBody?.body?.entry,
+          parsedBody?.body?.value
+        ];
+        data = bodyCandidates.find(Array.isArray) || [];
+      } catch (parseError) {
+        console.error('Kalender: response.body is geen geldige JSON:', parseError);
+      }
+    }
+
+    KALENDER_DATA = data
+      .filter(item => item && typeof item === 'object')
+      .slice()
+      .sort((a, b) =>
+        String(a.ISO || a.Start || a.start || '').localeCompare(
+          String(b.ISO || b.Start || b.start || '')
+        )
+      );
+
+    console.log('Kalender geladen:', KALENDER_DATA.length, 'regels', KALENDER_DATA);
+    return KALENDER_DATA;
+  } catch (e) {
+    KALENDER_DATA = [];
+    console.error('Kalender laden mislukt:', e);
+    throw e;
+  }
+}
+
+function renderPlanningTabel(){
+  if(!Array.isArray(KALENDER_DATA) || KALENDER_DATA.length === 0){
+    return `<div class="detail-section planning-section"><h3>Planning medewerkers</h3><p class="planning-empty">Geen planning beschikbaar.</p></div>`;
+  }
+  return `
+    <div class="detail-section planning-section">
+      <h3>Planning medewerkers</h3>
+      <div class="planning-table-wrap">
+        <table class="planning-table" aria-label="Planning medewerkers">
+          <thead><tr><th>Start</th><th>#Dagen</th><th>Medewerker(s)</th><th>Klant</th></tr></thead>
+          <tbody>
+            ${KALENDER_DATA.map(item => `
+              <tr>
+                <td>${escapeHtml(formatDate(String(item?.Start || '').slice(0,10)))}</td>
+                <td class="planning-duration">${escapeHtml(String(item?.Duur ?? ''))}</td>
+                <td>${escapeHtml(item?.Medewerkers || 'Niet toegewezen')}</td>
+                <td>${escapeHtml(item?.Klant || '—')}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+/*const DEFAULT_TASKS=['Oude stellingen afbreken','Nieuwe stellingen opbouwen','Nieuwe artikel indeling maken','VMI magazijn verhuizen','Artikelen nog identificeren','Huidige stellingen en bakken enkel over stickeren'];*/
+
+let sessionMonteur = { naam:'', email:'' };
+
+/* =========================================================
+   ROUTER
+========================================================= */
+let VIEW = 'splash';
+let VIEWSTACK = [];
+let VIEWPARAMS = {};
+
+function setView(view,params){
+  if(!APP_ROLE && view !== 'splash'){ view='splash'; params={}; }
+  if(APP_ROLE==='vmi' && ['pmList','pmForm','projectKPI','deleteProjects'].includes(view)){ view='monteurList'; params={}; }
+  VIEWSTACK.push({ view: VIEW, params: VIEWPARAMS });
+  VIEW = view; VIEWPARAMS = params || {};
+  render();
+}
+function goBack(){
+  if(VIEWSTACK.length === 0){ VIEW = 'home'; VIEWPARAMS = {}; render(); return; }
+  const prev = VIEWSTACK.pop();
+  VIEW = prev.view; VIEWPARAMS = prev.params;
+  render();
+}
+function resetToHome(){ VIEWSTACK = []; VIEW = 'home'; VIEWPARAMS = {}; render(); }
+
+function chrome(opts){
+  document.getElementById('backBtn').classList.toggle('hidden', VIEW === 'home' || VIEW === 'splash');
+  document.getElementById('logboekShortcut').style.display=(APP_ROLE==='vmi'||VIEW==='logboekList')?'none':'block';
+  document.getElementById('homeLogo').style.display = opts.showLogo === false ? 'none' : 'block';
+  document.getElementById('topTitle').textContent = opts.title || '';
+  const sub = document.getElementById('topSub');
+  if(opts.sub){ sub.style.display = 'block'; sub.textContent = opts.sub; } else { sub.style.display = 'none'; }
+  const rungs = document.getElementById('rungs');
+  if(opts.rungTotal){
+    rungs.style.display = 'flex';
+    rungs.innerHTML = '';
+    for(let i=1;i<=opts.rungTotal;i++){
+      const r = document.createElement('div');
+      r.className = 'rung';
+      if(i < opts.rungCurrent) r.classList.add('done');
+      else if(i === opts.rungCurrent) r.classList.add('current');
+      rungs.appendChild(r);
+    }
+  } else { rungs.style.display = 'none'; }
+
+  const bar = document.getElementById('bottombar');
+  if(opts.bar){
+    bar.classList.add('show');
+    const backBtn = document.getElementById('barBackBtn');
+    const nextBtn = document.getElementById('barNextBtn');
+    backBtn.style.visibility = opts.bar.showBack === false ? 'hidden' : 'visible';
+    backBtn.onclick = opts.bar.onBack || goBack;
+    nextBtn.textContent = opts.bar.nextLabel || 'Volgende';
+    nextBtn.disabled = !!opts.bar.nextDisabled;
+    nextBtn.onclick = opts.bar.onNext || (() => {});
+  } else {
+    bar.classList.remove('show');
+  }
+}
+
+function render(){
+  window.scrollTo(0,0);
+  const c = document.getElementById('content');
+  c.scrollTop = 0;
+  if(VIEW === 'splash') return renderSplash(c);
+  if(VIEW === 'home') return renderHome(c);
+  if(VIEW === 'pmList') return renderPmList(c);
+  if(VIEW === 'pmForm') return renderPmForm(c);
+  if(VIEW === 'projectKPI') return renderProjectKPI(c);
+  if(VIEW === 'deleteProjects') return renderDeleteProjects(c);
+  if(VIEW === 'monteurList') return renderMonteurList(c);
+  if(VIEW === 'monteurDetail') return renderMonteurDetail(c);
+  if(VIEW === 'wizard') return renderWizard(c);
+  if(VIEW === 'logboekList') return renderLogboekList(c);
+  if(VIEW === 'logboekDetail') return renderLogboekDetail(c);
+}
+
+/* =========================================================
+   SPLASH / ROLKEUZE
+========================================================= */
+function renderSplash(c){
+  chrome({ title:'Rubix Project Planning' });
+
+  c.innerHTML = `
+    <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;min-height:60vh;text-align:center;">
+      <div style="font-size:60px;margin-bottom:20px;">📦</div>
+      <h1 class="title">Rubix Project Planning</h1>
+      <p class="sub" id="splashStatus">${APP_READY ? 'Kies hoe je de app wilt gebruiken.' : 'Even geduld. De gegevens worden opgehaald...'}</p>
+
+      ${APP_READY ? `
+        <div class="tiles" style="width:100%;max-width:420px;margin-top:20px;">
+          <button class="tile" onclick="selectRole('manager')">
+            <div class="tile-icon">📋</div>
+            <div class="tile-text">
+              <h3>Projectmanager</h3>
+              <p>Projecten aanmaken, wijzigen en bekijken</p>
+            </div>
+          </button>
+
+          <button class="tile" onclick="selectRole('vmi')">
+            <div class="tile-icon">🛠️</div>
+            <div class="tile-text">
+              <h3>VMI Medewerker</h3>
+              <p>Openstaande klussen bekijken en opleveren</p>
+            </div>
+          </button>
+        </div>
+      ` : `
+        <div class="loading-txt">Even wachten...</div>
+      `}
+    </div>
+  `;
+}
+
+function selectRole(role){
+  const normalizedRole = role === 'vmi' ? 'vmi' : 'manager';
+  const roleLabel = normalizedRole === 'manager' ? 'Projectmanager' : 'VMI Medewerker';
+  const enteredPassword = window.prompt(`Voer het wachtwoord in voor ${roleLabel}:`);
+
+  if(enteredPassword === null) return;
+
+  if(enteredPassword !== ROLE_PASSWORDS[normalizedRole]){
+    window.alert('Onjuist wachtwoord. Probeer opnieuw.');
+    return;
+  }
+
+  APP_ROLE = normalizedRole;
+  VIEWSTACK = [];
+  VIEWPARAMS = {};
+  VIEW = 'home';
+  render();
+}
+
+/* =========================================================
+   HOME
+========================================================= */
+
+function renderHome(c){
+  chrome({ title:'Rubix Project Planning' });
+  c.innerHTML = `
+    ${LOCAL_MODE ? `<div class="setup-banner"><b>⚠️ Testmodus</b> Nog niet gekoppeld aan SharePoint — wat je hier invoert blijft alleen op dit scherm/deze sessie staan en verdwijnt bij herladen. Zodra de koppeling klaar is, wordt alles automatisch gedeeld tussen iedereen.</div>` : ''}
+    <p class="sub">Kies de taak</p>
+    <div class="tiles">
+      ${APP_ROLE === 'manager' ? `
+        <button class="tile" onclick="openPmForm()">
+          <div class="tile-icon">📋</div>
+          <div class="tile-text"><h3>Nieuw Project Aanmaken</h3><p>Nieuwe klus aanmaken, gegevens en foto's vooraf invullen</p></div>
+        </button>
+        <button class="tile" onclick="setView('pmList')">
+          <div class="tile-icon">📋</div>
+          <div class="tile-text"><h3>Project Bewerken</h3><p>Bestaande klus aanpassen</p></div>
+        </button>
+        <button class="tile" onclick="setView('projectKPI')">
+          <div class="tile-icon">📊</div>
+          <div class="tile-text"><h3>Project KPI</h3><p>Dashboard met KPI's, planning en acties</p></div>
+        </button>
+        <button class="tile" onclick="setView('deleteProjects')">
+          <div class="tile-icon" style="background:#B42318;color:#fff;">🗑️</div>
+          <div class="tile-text"><h3>Project verwijderen</h3><p>Een bestaand project definitief verwijderen</p></div>
+        </button>
+      ` : ''}
+      ${APP_ROLE === 'vmi' ? `
+        <button class="tile" onclick="setView('monteurList')">
+          <div class="tile-icon">🛠️</div>
+          <div class="tile-text"><h3>VMI Medewerker</h3><p>Klus bekijken en opleverdocument invullen bij de klant</p></div>
+        </button>
+      ` : ''}
+    </div>
+    <button class="logboek-tile" onclick="setView('logboekList')">📒 Logboek bekijken — eerder opgeleverde klussen</button>
+    ${renderPlanningTabel()}
+  `;
+}
+
+function dashboardDate(value){
+  if(!value) return null;
+  const d = new Date(String(value).length <= 10 ? `${value}T00:00:00` : value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+function dayStart(value){ const d = new Date(value); d.setHours(0,0,0,0); return d; }
+function daysFromToday(value){
+  const d = dashboardDate(value);
+  if(!d) return null;
+  return Math.round((dayStart(d)-dayStart(new Date()))/86400000);
+}
+function getEntryDate(entry){
+  return String(entry?.datumStart || entry?.datum || '');
+}
+function dashboardActionEntries(entries, projects){
+  const projectById = Object.fromEntries(projects.map(p => [String(p.id), p]));
+  const latestByProject = new Map();
+  entries
+    .filter(e => String(e?.openstaandeActies || '').trim())
+    .slice()
+    .sort((a,b) => String(b.completedAt || getEntryDate(b) || '').localeCompare(String(a.completedAt || getEntryDate(a) || '')))
+    .forEach(e => {
+      const projectId = String(e.projectId || '');
+      const key = projectId || `entry:${String(e.id || '')}`;
+      if(!latestByProject.has(key)){
+        latestByProject.set(key, {...e, project:projectById[projectId] || null});
+      }
+    });
+  return Array.from(latestByProject.values());
+}
+async function openDashboardProject(projectId){
+  if(!projectId) return;
+  await openPmForm(String(projectId));
+}
+async function loadProjectDashboard(){
+  const body = document.getElementById('dashboardBody');
+  if(!body) return;
+  try{
+    const [projects, entries] = await Promise.all([getProjects(), getLogboek()]);
+    if(!document.getElementById('dashboardBody')) return;
+    const openProjects = projects.filter(p => p.status !== 'afgerond');
+    const completedProjects = projects.filter(p => p.status === 'afgerond');
+    const actions = dashboardActionEntries(entries, projects);
+    const pendingActions = actions.filter(a => !a.actiesVerstuurd);
+    const returnVisits = entries
+      .filter(e => [false,'false',0,'0'].includes(e.projectAfgerond) || String(e.projectAfgerond).toLowerCase()==='false')
+      .sort((a,b) => String(b.completedAt || '').localeCompare(String(a.completedAt || '')));
+    const upcoming = projects
+      .map(p => ({...p, days:daysFromToday(p.datumStart)}))
+      .filter(p => p.status !== 'afgerond' && p.days !== null && p.days >= 0 && p.days <= 13)
+      .sort((a,b) => a.days-b.days);
+    const thisWeekCount = upcoming.filter(p => p.days <= 6).length;
+    const workload = {};
+    openProjects.forEach(p => (parseArray(p.monteurs) || []).forEach(m => {
+      const name = monteurNaam(m) || 'Niet toegewezen';
+      workload[name] = (workload[name] || 0) + 1;
+    }));
+    const workloadRows = Object.entries(workload).sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]));
+    const latestActionByProject = actions;
+    body.innerHTML = `
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-value">${openProjects.length}</div><div class="kpi-label">Open projecten</div></div>
+        <div class="kpi-card success"><div class="kpi-value">${completedProjects.length}</div><div class="kpi-label">Afgerond</div></div>
+        <div class="kpi-card ${pendingActions.length ? 'attention' : ''}"><div class="kpi-value">${pendingActions.length}</div><div class="kpi-label">Acties niet doorgegeven</div></div>
+        <div class="kpi-card"><div class="kpi-value">${thisWeekCount}</div><div class="kpi-label">Komende 7 dagen</div></div>
+      </div>
+      <div class="dashboard-grid">
+        <div class="dash-panel danger">
+          <h3>⚠ Direct aandacht nodig</h3>
+          ${pendingActions.length ? pendingActions.slice(0,5).map(a => `
+            <div class="action-card">
+              <div class="action-title">${escapeHtml(a.openstaandeActies)}</div>
+              <div class="action-meta">${escapeHtml(a.klantNaam || a.project?.klantNaam || 'Onbekende klant')} · bezoek ${formatDate(getEntryDate(a))}</div>
+              <span class="action-status danger">Nog niet doorgegeven</span>
+              ${a.projectId ? `<div style="margin-top:7px;"><button class="dash-link" onclick="void openDashboardProject('${escapeHtml(String(a.projectId))}')">Project openen</button></div>` : ''}
+            </div>`).join('') : '<p class="dash-empty">Geen acties die nog doorgegeven moeten worden.</p>'}
+        </div>
+        <div class="dash-panel">
+          <h3>🔄 Terugkombezoeken</h3>
+          ${returnVisits.length ? returnVisits.slice(0,5).map(v => `
+            <div class="action-card">
+              <div class="action-title">${escapeHtml(v.klantNaam || 'Onbekende klant')}</div>
+              <div class="action-meta">Laatste bezoek: ${formatDate(getEntryDate(v))}${v.monteurNaam ? ` · ${escapeHtml(v.monteurNaam)}` : ''}</div>
+              ${v.openstaandeActies ? `<div class="action-meta"><b>Actie:</b> ${escapeHtml(v.openstaandeActies)}</div>` : ''}
+              <span class="action-status">Vervolg nodig</span>
+            </div>`).join('') : '<p class="dash-empty">Geen terugkombezoeken geregistreerd.</p>'}
+        </div>
+        <div class="dash-panel">
+          <h3>📅 Planning komende 14 dagen</h3>
+          ${upcoming.length ? upcoming.slice(0,8).map(p => `
+            <div class="planning-line">
+              <div class="planning-date">${formatDate(p.datumStart)}</div>
+              <div><div class="planning-customer">${escapeHtml(p.klantNaam || 'Onbekende klant')}</div><div class="planning-detail">${parseArray(p.monteurs).map(m => escapeHtml(monteurNaam(m))).join(', ') || 'Niet toegewezen'}</div></div>
+            </div>`).join('') : '<p class="dash-empty">Geen open projecten gepland in de komende 14 dagen.</p>'}
+        </div>
+        <div class="dash-panel">
+          <h3>👷 Werkdruk open projecten</h3>
+          ${workloadRows.length ? workloadRows.slice(0,8).map(([name,count]) => `
+            <div class="workload-line"><span>${escapeHtml(name)}</span><span class="workload-count">${count} project${count===1?'':'en'}</span></div>`).join('') : '<p class="dash-empty">Nog geen medewerkers aan open projecten toegewezen.</p>'}
+        </div>
+        <div class="dash-panel span-2">
+          <h3>📌 Laatste openstaande acties per project</h3>
+          ${latestActionByProject.length ? latestActionByProject.slice(0,8).map(a => `
+            <div class="action-card">
+              <div class="action-title">${escapeHtml(a.klantNaam || a.project?.klantNaam || 'Onbekende klant')}</div>
+              <div class="action-meta">${escapeHtml(a.openstaandeActies)} · ${a.actiesVerstuurd ? 'doorgegeven' : 'nog niet doorgegeven'}</div>
+            </div>`).join('') : '<p class="dash-empty">Geen openstaande acties in het logboek.</p>'}
+        </div>
+      </div>`;
+    const updated = document.getElementById('dashboardUpdated');
+    if(updated) updated.textContent = `Bijgewerkt ${new Date().toLocaleTimeString('nl-NL',{hour:'2-digit',minute:'2-digit'})}`;
+  }catch(e){
+    console.error('Dashboard laden mislukt:', e);
+    if(body) body.innerHTML = '<div class="dashboard-error">Het dashboard kon niet worden geladen. Controleer de verbinding en probeer opnieuw.</div>';
+  }
+}
+
+/* =========================================================
+   PROJECTKPI — DASHBOARD
+========================================================= */
+function renderProjectKPI(c){
+  // Extra beveiliging: dit scherm is alleen beschikbaar voor projectmanagers.
+  if(!managerAllowed()){
+    setView('monteurList');
+    return;
+  }
+
+  chrome({
+    title:'ProjectKPI',
+    sub:'Dashboard'
+  });
+
+  c.innerHTML = `
+    <section class="dashboard" aria-label="Projectdashboard">
+      <div class="dashboard-head">
+        <h2>Projectdashboard</h2>
+        <div class="dashboard-updated" id="dashboardUpdated">Gegevens laden…</div>
+      </div>
+      <div id="dashboardBody">
+        <div class="loading-txt">Dashboard laden…</div>
+      </div>
+    </section>
+  `;
+
+  requestAnimationFrame(() => loadProjectDashboard());
+}
+
+/* =========================================================
+   PROJECTMANAGER — LIST
+========================================================= */
+async function renderPmList(c){
+  chrome({ title:'Projecten', sub:'Project bewerken' });
+  c.innerHTML = `<div class="top-actions">
+<button class="small-btn" onclick="openPmForm()">+ Nieuw project</button></div>
+	<div id="pmListBody">
+		<div class="loading-txt">
+			Projecten laden…
+		</div>
+	</div>`;
+  try{
+  const projects = await getProjects();
+
+let entries = [];
+try {
+    entries = await getLogboek();
+} catch(e) {
+    console.warn("Logboek niet beschikbaar");
+}
+
+const visitCount = {};
+entries.forEach(e => {
+    visitCount[e.projectId] = (visitCount[e.projectId] || 0) + 1;
+});
+    const body = document.getElementById('pmListBody');
+    if(projects.length === 0){
+      body.innerHTML = `<div class="empty-state"><div class="ic">📋</div><p>Nog geen projecten aangemaakt.<br>Klik op "+ Nieuw project" om te beginnen.</p></div>`;
+      return;
+    }
+    body.innerHTML = projects.map(p => `
+      <div class="project-card" onclick="openPmForm('${p.id}')">
+        <div class="pc-top">
+          <div><div class="pc-name">${escapeHtml(p.klantNaam)}</div><div class="pc-addr">${escapeHtml(p.adres)}</div></div>
+          <span class="badge ${p.status === 'afgerond' ? 'done' : 'open'}">${p.status === 'afgerond' ? 'Afgerond' : 'Open'}</span>
+        </div>
+        <div class="pc-meta">Gepland: ${formatDateRange(p.datumStart, p.datumEind)} · ${parseArray(p.werkzaamheden).length} werkzaamheden · ${parseArray(p.fotos).length} foto's${p.hotelNodig ? ' · 🏨 hotel' : ''}${p.monteurs && p.monteurs.length ? ' · 👤 ' + p.monteurs.map(m=>escapeHtml(monteurNaam(m))).join(', ') : ''}${visitCount[p.id] ? ` · ✓ ${visitCount[p.id]} bezoek${visitCount[p.id]>1?'en':''} geweest` : ''}</div>
+      </div>
+    `).join('');
+  }catch(e){
+    document.getElementById('pmListBody').innerHTML = `<div class="empty-state"><div class="ic">⚠️</div><p>Kon projecten niet laden. Controleer de verbinding.</p></div>`;
+  }
+}
+
+/* =========================================================
+   PROJECTMANAGER — PROJECT VERWIJDEREN
+========================================================= */
+async function renderDeleteProjects(c){
+  if(!managerAllowed()){
+    setView('monteurList');
+    return;
+  }
+  chrome({ title:'Project verwijderen', sub:'Rubix Project Planning' });
+  c.innerHTML = `
+    <p class="sub">Selecteer een project dat je definitief wilt verwijderen.</p>
+    <div id="deleteProjectMessage" class="delete-project-message"></div>
+    <div id="deleteProjectList"><div class="loading-txt">Projecten laden…</div></div>
+  `;
+  await loadDeleteProjectList();
+}
+async function loadDeleteProjectList(){
+  const body = document.getElementById('deleteProjectList');
+  if(!body) return;
+  try{
+    const projects = await getProjects();
+    if(!document.getElementById('deleteProjectList')) return;
+    if(projects.length === 0){
+      body.innerHTML = `<div class="empty-state"><div class="ic">✅</div><p>Er zijn geen projecten om te verwijderen.</p></div>`;
+      return;
+    }
+    body.innerHTML = projects.map(p => `
+      <div class="project-card delete-project-card">
+        <div class="pc-top">
+          <div><div class="pc-name">${escapeHtml(p.klantNaam || 'Project zonder klantnaam')}</div><div class="pc-addr">${escapeHtml(p.adres || 'Geen adres')}</div></div>
+          <span class="badge ${p.status === 'afgerond' ? 'done' : 'open'}">${p.status === 'afgerond' ? 'Afgerond' : 'Open'}</span>
+        </div>
+        <div class="pc-meta">Gepland: ${formatDateRange(p.datumStart, p.datumEind)}</div>
+        <div class="delete-project-actions">
+          <button class="danger-btn" onclick="confirmDeleteProject('${escapeHtml(String(p.id))}', '${escapeHtml(String(p.klantNaam || 'dit project')).replace(/'/g, '&#39;')}')">Project verwijderen</button>
+        </div>
+      </div>
+    `).join('');
+  }catch(e){
+    body.innerHTML = `<div class="empty-state"><div class="ic">⚠️</div><p>Kon projecten niet laden. Controleer de verbinding.</p></div>`;
+  }
+}
+async function confirmDeleteProject(id, klantNaam){
+  if(!managerAllowed() || !id) return;
+  const confirmed = window.confirm(`Weet je zeker dat je het project van ${klantNaam} wilt verwijderen?\n\nDit kan niet ongedaan worden gemaakt.`);
+  if(!confirmed) return;
+  const secondConfirmed = window.confirm(`Laatste controle: project van ${klantNaam} definitief verwijderen?`);
+  if(!secondConfirmed) return;
+  const buttons = document.querySelectorAll('.danger-btn');
+  buttons.forEach(button => button.disabled = true);
+  showDeleteProjectMessage('Project verwijderen…', 'success');
+  try{
+    await deleteProject(id);
+    showDeleteProjectMessage(`Project van ${klantNaam} is verwijderd.`, 'success');
+    await loadDeleteProjectList();
+  }catch(e){
+    console.error('Project verwijderen mislukt:', e);
+    showDeleteProjectMessage('Verwijderen is mislukt. Controleer de Power Automate-flow en probeer opnieuw.', 'error');
+    document.querySelectorAll('.danger-btn').forEach(button => button.disabled = false);
+  }
+}
+function showDeleteProjectMessage(message, type){
+  const el = document.getElementById('deleteProjectMessage');
+  if(!el) return;
+  el.textContent = message;
+  el.className = `delete-project-message show ${type === 'error' ? 'error' : 'success'}`;
+}
+
+/* =========================================================
+   PROJECTMANAGER — FORM
+========================================================= */
+let formWerkzaamheden = [];
+let formFotos = [];
+let formMonteurs = [];
+let formEditingId = null;
+
+async function openPmForm(id){
+  await Promise.all([ensureProjectManagersLoaded(),ensureVMIMedewerkersLoaded(),ensureVMITakenLoaded()]);
+   formEditingId = id || null;
+  formWerkzaamheden = [];
+  formFotos = [];
+  formMonteurs = [];
+
+  let project = null;
+  if(id){
+    project = await getProjectById(id);
+    if(project){
+      formWerkzaamheden = parseArray(project.werkzaamheden).slice();
+      formFotos = parseArray(project.fotos).slice();
+      formMonteurs = parseArray(project.monteurs).slice();
+    }
+  }
+
+  setView('pmForm', { editing: !!id, project });
+}
+
+function renderPmForm(c){
+  const p = VIEWPARAMS.project;
+  // formEditingId is de globale variabele die in openPmForm is gezet (id bij bewerken, null bij nieuw).
+  chrome({ title: VIEWPARAMS.editing ? 'Project bewerken' : 'Nieuw project', sub:'Project aanmaken',
+    bar:{ nextLabel: VIEWPARAMS.editing ? 'Wijzigingen opslaan' : 'Project opslaan', onNext: savePmForm, onBack: goBack } });
+  c.innerHTML = `
+    <div class="error-banner" id="pmErrorBanner">Vul de rood gemarkeerde velden in.</div>
+    <div class="field"><label>Klantnaam</label><input type="text" id="pm_klantNaam" value="${escapeHtml(p?.klantNaam||'')}" placeholder="Bijv. Bouwbedrijf Jansen B.V."></div>
+    <div class="field"><label>Projectadres</label><input type="text" id="pm_adres" value="${escapeHtml(p?.adres||'')}" placeholder="Straat, huisnummer, plaats"></div>
+    <div class="field-row">
+      <div class="field"><label>Startdatum</label><input type="date" id="pm_datumStart" value="${p?.datumStart || todayISO()}"></div>
+      <div class="field"><label>Einddatum</label><input type="date" id="pm_datumEind" value="${p?.datumEind || p?.datumStart || todayISO()}"></div>
+    </div>
+    <div class="field"><label>Starttijd op locatie (optioneel)</label><input type="time" id="pm_startTijdLocatie" value="${escapeHtml(p?.startTijdLocatie||'')}"></div>
+    <div class="field-row">
+      <div class="field"><label>Contactpersoon</label><input type="text" id="pm_contactNaam" value="${escapeHtml(p?.contactNaam||'')}" placeholder="Naam"></div>
+      <div class="field"><label>Telefoon</label><input type="tel" id="pm_contactTel" value="${escapeHtml(p?.contactTelefoon||'')}" placeholder="06-..."></div>
+    </div>
+    <div class="field"><label>E-mail contactpersoon</label><input type="email" id="pm_contactEmail" value="${escapeHtml(p?.contactEmail||'')}" placeholder="klant@bedrijf.nl"></div>
+    <div class="field"><label>Naam projectmanager</label><select id="pm_projectManagerNaam" onchange="updateProjectManagerEmail()"><option value="">Kies projectmanager...</option>${PROJECT_MANAGERS.map(pm=>`<option value="${pm.naam}" ${p?.projectManagerNaam===pm.naam?'selected':''}>${pm.naam}</option>`).join('')}</select></div>
+    <div class="field"><label>E-mailadres projectmanager</label><input type="email" id="pm_projectManagerEmail" value="${escapeHtml(p?.projectManagerEmail||'')}"></div>
+    <div class="field"><label>Contactpersoon Rubix (optioneel)</label><input type="text" id="pm_rubixContact" value="${escapeHtml(p?.rubixContactNaam||'')}" placeholder="Bijv. accountmanager naam"></div>
+  
+    <div class="field"><label>Opmerkingen vooraf (optioneel)</label><textarea id="pm_opmerkingen" rows="4" placeholder="Bijzonderheden voor de monteur...">${escapeHtml(p?.opmerkingenVooraf||'')}</textarea></div>
+
+    <div class="section-label">Toegewezen VMI medewerker(s)</div>
+    <div id="monteurListBodyForm"></div>
+    <div class="field"><select onchange="addSelectedMonteur(this)"><option value="">VMI medewerker toevoegen...</option>${VMI_MEDEWERKERS.map(n=>`<option value="${n}">${n}</option>`).join('')}</select></div>
+
+    <div class="field" style="margin-top:4px;">
+      <label style="display:flex; align-items:center; gap:9px; cursor:pointer;">
+        <input type="checkbox" id="pm_hotelNodig" style="width:19px;height:19px;" ${p?.hotelNodig ? 'checked' : ''} onchange="toggleHotelFields()">
+        <span style="text-transform:none; font-size:14.5px; font-weight:600; color:var(--text);">Hotel geregeld voor deze klus</span>
+      </label>
+    </div>
+    <div id="hotelFields" style="display:${p?.hotelNodig ? 'block' : 'none'};">
+      <div class="field"><label>Hotelnaam</label><input type="text" id="pm_hotelNaam" value="${escapeHtml(p?.hotelNaam||'')}" placeholder="Naam van het hotel"></div>
+      <div class="field"><label>Hoteladres</label><input type="text" id="pm_hotelAdres" value="${escapeHtml(p?.hotelAdres||'')}" placeholder="Straat, huisnummer, plaats"></div>
+      <div class="field"><label>Opmerkingen hotel (optioneel)</label><textarea id="pm_hotelOpmerkingen" rows="3" placeholder="Boekingsnummer, check-in tijd, aantal kamers...">${escapeHtml(p?.hotelOpmerkingen||'')}</textarea></div>
+    </div>
+
+    <div class="section-label">Werkzaamheden</div>
+    <div id="taskListBody"></div>
+    <div class="inline-add-row" id="taskAddRow" style="display:none;">
+      <input type="text" id="taskAddInput" placeholder="Omschrijving van de werkzaamheid...">
+      <div class="row-btns"><button class="save-add" onclick="confirmAddTask()">Toevoegen</button><button class="cancel-add" onclick="cancelAddTask()">Annuleren</button></div>
+    </div>
+    <button class="add-item-btn" id="taskAddBtn" onclick="showAddTask()">+ Werkzaamheid toevoegen</button>
+    <div class="chip-row">${DEFAULT_TASKS.map(t => `<button class="chip" onclick="quickAddTask('${t.replace(/'/g,"\\'")}')">+ ${escapeHtml(t)}</button>`).join('')}</div>
+
+    <div class="section-label">Foto's (optioneel, max. 6)</div>
+    <div class="photo-grid" id="photoGrid"></div>
+    <div class="photo-add-btns">
+      <button onclick="document.getElementById('galleryInput').click()">📁 Uit galerij</button>
+      <button onclick="document.getElementById('cameraInput').click()">📷 Foto maken</button>
+    </div>
+    <div class="photo-hint">Foto's worden automatisch verkleind voordat ze worden opgeslagen.</div>
+    <input type="file" id="galleryInput" accept="image/*" multiple style="display:none;" onchange="handlePhotoInput(event)">
+    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoInput(event)">
+  `;
+  renderTaskList();
+  renderPhotoGrid();
+  renderMonteurFormList();
+  updateProjectManagerEmail();
+}
+
+function toggleHotelFields(){
+  document.getElementById('hotelFields').style.display = document.getElementById('pm_hotelNodig').checked ? 'block' : 'none';
+}
+
+function renderMonteurFormList(){
+  const body = document.getElementById('monteurListBodyForm');
+  if(!body) return;
+  if(formMonteurs.length === 0){
+    body.innerHTML = `<p style="font-size:13px; color:var(--text-mute); margin:0 0 10px;">Nog geen monteur toegewezen.</p>`;
+    return;
+  }
+  body.innerHTML = formMonteurs.map((m,i) => `
+    <div class="task-row"><span>👤 ${escapeHtml(monteurNaam(m))}</span><button onclick="removeMonteur(${i})">✕</button></div>
+  `).join('');
+}
+function updateProjectManagerEmail() {
+    const naam = val('pm_projectManagerNaam');
+
+    console.log('Geselecteerde PM:', naam);
+    console.log('Beschikbare PMs:', PROJECT_MANAGERS);
+
+    const pm = PROJECT_MANAGERS.find(
+        x => x.naam === naam
+    );
+
+    console.log('Gevonden PM:', pm);
+
+    const el = document.getElementById('pm_projectManagerEmail');
+
+    if (el) {
+        el.value = pm ? pm.email : '';
+        console.log('Email gevuld:', el.value);
+    } else {
+        console.error('Veld pm_projectManagerEmail niet gevonden');
+    }
+}
+/*function updateProjectManagerEmail(){const pm=PROJECT_MANAGERS.find(x=>x.naam===val('pm_projectManagerNaam'));const el=document.getElementById('pm_projectManagerEmail');if(el)el.value=pm?pm.email:'';}*/
+function addSelectedMonteur(el){const text=el.value;if(text&&!formMonteurs.some(m=>monteurNaam(m)===text))formMonteurs.push({id:uid(),text});el.value='';renderMonteurFormList();}
+function removeMonteur(i){ formMonteurs.splice(i,1); renderMonteurFormList(); }
+
+function renderTaskList(){
+  const body = document.getElementById('taskListBody');
+  if(!body) return;
+  if(formWerkzaamheden.length === 0){
+    body.innerHTML = `<p style="font-size:13px; color:var(--text-mute); margin:0 0 10px;">Nog geen werkzaamheden toegevoegd.</p>`;
+    return;
+  }
+  body.innerHTML = formWerkzaamheden.map((t,i) => `
+    <div class="task-row"><span>${escapeHtml(t.text)}</span><button onclick="removeTask(${i})">✕</button></div>
+  `).join('');
+}
+function showAddTask(){ document.getElementById('taskAddRow').style.display = 'block'; document.getElementById('taskAddBtn').style.display = 'none'; document.getElementById('taskAddInput').focus(); }
+function cancelAddTask(){ document.getElementById('taskAddInput').value=''; document.getElementById('taskAddRow').style.display='none'; document.getElementById('taskAddBtn').style.display='block'; }
+function confirmAddTask(){
+  const input = document.getElementById('taskAddInput');
+  const text = input.value.trim();
+  if(text){ formWerkzaamheden.push({ id: uid(), text }); renderTaskList(); }
+  cancelAddTask();
+}
+function quickAddTask(text){
+  if(formWerkzaamheden.some(t => t.text === text)) return;
+  formWerkzaamheden.push({ id: uid(), text });
+  renderTaskList();
+}
+function removeTask(i){ formWerkzaamheden.splice(i,1); renderTaskList(); }
+
+function renderPhotoGrid(){
+  const grid = document.getElementById('photoGrid');
+  if(!grid) return;
+  grid.innerHTML = formFotos.map((src,i) => `
+    <div class="photo-thumb"><img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)"><button class="rm" onclick="event.stopPropagation(); removePhoto(${i})">✕</button></div>
+  `).join('');
+}
+async function handlePhotoInput(e){
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  for(const file of files){
+    if(formFotos.length >= 6) break;
+    try{ const compressed = await compressImage(file); formFotos.push(compressed); }catch(err){}
+  }
+  renderPhotoGrid();
+}
+function removePhoto(i){ formFotos.splice(i,1); renderPhotoGrid(); }
+
+async function savePmForm(){
+  const req = ['pm_klantNaam','pm_adres','pm_contactNaam','pm_contactEmail','pm_projectManagerNaam'];
+  let ok = true, firstInvalid = null;
+  req.forEach(id => {
+    const el = document.getElementById(id);
+    const empty = !el.value.trim();
+    el.classList.toggle('invalid', empty);
+    if(empty){ ok = false; if(!firstInvalid) firstInvalid = el; }
+  });
+  document.getElementById('pmErrorBanner').classList.toggle('show', !ok);
+  if(!ok){ firstInvalid.focus(); return; }
+
+  const project = {
+    id: formEditingId || uid(),
+    klantNaam: val('pm_klantNaam'),
+    adres:val('pm_adres'),
+    startTijdLocatie:val('pm_startTijdLocatie'),
+    contactNaam: val('pm_contactNaam'),
+    contactTelefoon: val('pm_contactTel'),
+    contactEmail: val('pm_contactEmail'),
+    projectManagerNaam:val('pm_projectManagerNaam'),
+    projectManagerEmail:val('pm_projectManagerEmail'),
+    rubixContactNaam: val('pm_rubixContact'),
+    datumStart: val('pm_datumStart'),
+    datumEind: val('pm_datumEind') || val('pm_datumStart'),
+    opmerkingenVooraf: val('pm_opmerkingen'),
+    monteurs: formMonteurs,
+    hotelNodig: document.getElementById('pm_hotelNodig').checked,
+    hotelNaam: val('pm_hotelNaam'),
+    hotelAdres: val('pm_hotelAdres'),
+    hotelOpmerkingen: val('pm_hotelOpmerkingen'),
+    werkzaamheden: formWerkzaamheden,
+    fotos: formFotos,
+    status: (formEditingId && VIEWPARAMS.project) ? VIEWPARAMS.project.status : 'open',
+    createdAt: formEditingId && VIEWPARAMS.project ? VIEWPARAMS.project.createdAt : new Date().toISOString()
+  };
+  const nextBtn = document.getElementById('barNextBtn');
+  nextBtn.disabled = true; nextBtn.textContent = 'Opslaan…';
+  try{
+    // Bestaand project -> bijwerken; nieuw project -> aanmaken.
+    if(formEditingId){
+      await updateProject(project);
+    } else {
+      await createProject(project);
+    }
+    goBack();
+    renderPmList(document.getElementById('content'));
+  }catch(e){
+    nextBtn.disabled = false; nextBtn.textContent = 'Opnieuw proberen';
+  }
+}
+
+/* =========================================================
+   MONTEUR — LIST
+========================================================= */
+let monteurFilter = '';
+async function renderMonteurList(c){
+  chrome({ title:'Openstaande klussen', sub:'VMI Medewerker' });
+  c.innerHTML = `
+    <div class="field"><label>Filter op VMI medewerker (optioneel)</label><input type="text" id="monteurFilterInput" value="${escapeHtml(monteurFilter)}" placeholder="Naam..." oninput="onMonteurFilterInput(this.value)"></div>
+    <div class="chip-row">
+      <button class="chip" onclick="applyMonteurFilter(sessionMonteur.naam)">👤 Mijn projecten</button>
+      <button class="chip" onclick="applyMonteurFilter('')">Alles tonen</button>
+    </div>
+    <div id="monteurListBody"><div class="loading-txt">Klussen laden…</div></div>`;
+  await loadMonteurList();
+}
+const debouncedMonteurFilter=debounce(v=>{monteurFilter=v;loadMonteurList();},300);
+function onMonteurFilterInput(v){debouncedMonteurFilter(v);}
+function applyMonteurFilter(name){ monteurFilter = name || ''; const inp = document.getElementById('monteurFilterInput'); if(inp) inp.value = monteurFilter; loadMonteurList(); }
+
+// Haalt veilig de naam uit een monteur, ongeacht de vorm
+function monteurNaam(m){
+  if(!m) return '';
+  if(typeof m === 'string') return m;
+  return String(m.text || m.naam || m.name || m.Title || '');
+}
+
+async function loadMonteurList(){
+  const body = document.getElementById('monteurListBody');
+  if(!body) return;
+  try{
+    let projects = (await getProjects()).filter(p => p.status !== 'afgerond');
+    const f = monteurFilter.trim().toLowerCase();
+	if(f) projects = projects.filter(p =>(p.monteurs || []).some(m => monteurNaam(m).toLowerCase().includes(f)));
+        if(projects.length === 0){
+      body.innerHTML = `<div class="empty-state"><div class="ic">✅</div><p>${f ? 'Geen openstaande klussen voor deze medewerker.' : 'Geen openstaande klussen.<br>Alles is afgerond of er is nog niets aangemaakt.'}</p></div>`;
+      return;
+    }
+console.log('PROJECTS', projects);
+
+    body.innerHTML = projects.map(p => `
+ <div class="project-card" onclick=" setView('monteurDetail', {id:'${p.id}'})">
+
+        <div class="pc-top"><div><div class="pc-name">${escapeHtml(p.klantNaam)}</div><div class="pc-addr">${escapeHtml(p.adres)}</div></div><span class="badge open">Open</span></div>
+        <div class="pc-meta">Gepland: ${formatDateRange(p.datumStart, p.datumEind)} · ${parseArray(p.werkzaamheden).length} werkzaamheden${p.hotelNodig ? ' · 🏨 hotel' : ''}
+${p.monteurs && p.monteurs.length ? ' · 👤 ' + p.monteurs.map(m=>escapeHtml(monteurNaam(m))).join(', ') : ''}
+</div>
+      </div>
+    `).join('');
+  }catch(e){
+    body.innerHTML = `<div class="empty-state"><div class="ic">⚠️</div><p>Kon klussen niet laden.</p></div>`;
+  }
+}
+
+/* =========================================================
+   MONTEUR — DETAIL
+========================================================= */
+async function renderMonteurDetail(c){
+  chrome({ title:'Klusdetails', sub:'VMI Medewerker', bar:{ nextLabel:'Oplevering / bezoek invullen', onNext: () => startWizard(VIEWPARAMS.id), onBack: goBack } });
+  c.innerHTML = `<div class="loading-txt">Laden…</div>`;
+  const p = await getProjectById(VIEWPARAMS.id);
+  if(!p){ c.innerHTML = `<div class="empty-state"><div class="ic">⚠️</div><p>Project niet gevonden.</p></div>`; return; }
+  let eerdereBezoeken = [];
+  try{ eerdereBezoeken = (await getLogboek()).filter(e => e.projectId === p.id).sort((a,b) => b.completedAt.localeCompare(a.completedAt)); }catch(e){}
+  c.innerHTML = `
+    <h1 class="title">${escapeHtml(p.klantNaam)}</h1>
+    <p class="sub">${escapeHtml(p.adres)}</p>
+    <div class="detail-section">
+      <h3>Contactpersoon</h3>
+      <div class="detail-row"><span>Naam</span><span>${escapeHtml(p.contactNaam)}</span></div>
+      ${p.contactTelefoon ? `<div class="detail-row"><span>Telefoon</span><span><a class="contact-link" href="tel:${escapeHtml(p.contactTelefoon)}">${escapeHtml(p.contactTelefoon)}</a></span></div>` : ''}
+      ${p.contactEmail ? `<div class="detail-row"><span>E-mail</span><span><a class="contact-link" href="mailto:${escapeHtml(p.contactEmail)}">${escapeHtml(p.contactEmail)}</a></span></div>` : ''}
+      <div class="detail-row"><span>Periode</span><span>${formatDateRange(p.datumStart, p.datumEind)}</span></div>
+      ${p.projectManagerNaam ? `<div class="detail-row"><span>Projectmanager</span><span>${escapeHtml(p.projectManagerNaam)}</span></div>` : ''}
+      ${p.rubixContactNaam ? `<div class="detail-row"><span>Rubix-contact</span><span>${escapeHtml(p.rubixContactNaam)}</span></div>` : ''}
+      ${p.monteurs && p.monteurs.length ? `<div class="detail-row"><span>Toegewezen aan</span><span>${p.monteurs.map(m=>escapeHtml(monteurNaam(m))).join(', ')}</span></div>` : ''}
+    </div>
+    ${p.hotelNodig ? `<div class="detail-section"><h3>🏨 Hotel</h3>
+      <div class="detail-row"><span>Naam</span><span>${escapeHtml(p.hotelNaam||'—')}</span></div>
+      <div class="detail-row"><span>Adres</span><span>${escapeHtml(p.hotelAdres||'—')}</span></div>
+      ${p.hotelOpmerkingen ? `<div class="detail-row"><span>Opmerkingen</span><span>${escapeHtml(p.hotelOpmerkingen)}</span></div>` : ''}
+    </div>` : ''}
+    ${p.opmerkingenVooraf ? `<div class="detail-section"><h3>Opmerkingen vooraf</h3><p style="margin:0; font-size:14.5px; line-height:1.5;">${escapeHtml(p.opmerkingenVooraf)}</p></div>` : ''}
+    <div class="detail-section">
+      <h3>Werkzaamheden (${parseArray(p.werkzaamheden).length})</h3>
+      <div class="task-list-view">${parseArray(p.werkzaamheden).map(t => `<div>• ${escapeHtml(t.text)}</div>`).join('') || '<span style="color:var(--text-mute);">Geen werkzaamheden vooraf ingevuld.</span>'}</div>
+    </div>
+    ${p.fotos.length ? `<div class="detail-section"><h3>Foto's (${parseArray(p.fotos).length}) — tik om te vergroten</h3><div class="photo-grid">${parseArray(p.fotos).map(src => `<div class="photo-thumb"><img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)"></div>`).join('')}</div></div>` : ''}
+    ${eerdereBezoeken.length ? `<div class="detail-section"><h3>Eerdere bezoeken (${eerdereBezoeken.length})</h3>${eerdereBezoeken.map(e => `
+      <div class="detail-row" style="align-items:flex-start;"><span>${formatDate(e.datum)}</span><span>${escapeHtml(e.monteurNaam)}${e.openstaandeActies ? '<br><span style="font-weight:400; color:var(--safety-dark);">Actie: '+escapeHtml(e.openstaandeActies)+(e.actiesVerstuurd?' (per mail verstuurd)':' (nog niet verstuurd)')+'</span>' : ''}</span></div>
+    `).join('')}</div>` : ''}
+  `;
+}
+
+async function startWizard(projectId){
+  await ensureVMIMedewerkersLoaded();
+  const p = await getProjectById(projectId);
+  if(!p) return;
+  wizardProject = p;
+  wizardChecklist = parseArray(p.werkzaamheden).map(t => ({ id: t.id, text: t.text, checked:false, note:'' }));
+  wizardSigData = { monteur:null, klant:null };
+  wizardVervolg = { afgerond:'ja', algemeneOpmerkingen:'', openstaandeActies:'', actiesVerstuurd:false };
+  wizardMeta={projectManagerEmail:p.projectManagerEmail||'-',datumStart:todayISO(),datumEind:todayISO(),klantOndertekenaar:''};wizardFotos=[];wizardVervolg.opmerkingenKlant='';
+  wizardStep = 1;
+  setView('wizard', { projectId });
+}
+
+/* =========================================================
+   WIZARD (monteur oplevering)
+========================================================= */
+let wizardProject = null;
+let wizardChecklist = [];
+let wizardSigData = { monteur:null, klant:null };
+let wizardStep = 1;
+let wizardCustomCounter = 0;
+let wizardVervolg = { afgerond:'ja', algemeneOpmerkingen:'', openstaandeActies:'', actiesVerstuurd:false };
+let wizardMeta={projectManagerEmail:'',datumStart:'',datumEind:'',klantOndertekenaar:''};
+let wizardFotos=[];
+
+const WIZARD_TITLES = { 1:'Gegevens bevestigen', 2:'Checklist', 3:'Opmerkingen', 4:'Handtekeningen', 5:'Controleren & versturen' };
+
+function renderWizard(c){
+  chrome({ title: WIZARD_TITLES[wizardStep], sub:'VMI Medewerker — ' + wizardProject.klantNaam, rungTotal:5, rungCurrent:wizardStep,
+    bar:{ showBack:true, onBack: wizardBack, nextLabel: wizardStep===5 ? 'Gegevens opladen' : 'Volgende', onNext: wizardNext } });
+
+  if(wizardStep === 1) return renderWizardStep1(c);
+  if(wizardStep === 2) return renderWizardStep2(c);
+  if(wizardStep === 3) return renderWizardStep3(c);
+  if(wizardStep === 4) return renderWizardStep4(c);
+  if(wizardStep === 5) return renderWizardStep5(c);
+}
+
+function wizardBack(){
+  if(wizardStep === 1){ goBack(); return; }
+  wizardStep -= 1; render();
+}
+function wizardNext(){
+  if(!validateWizardStep(wizardStep)) return;
+  if(wizardStep === 1){
+    sessionMonteur.naam=val('w_monteurNaam');wizardMeta.projectManagerEmail=val('w_projectManagerEmail');wizardMeta.datumStart=val('w_datumStart');wizardMeta.datumEind=val('w_datumEind')||val('w_datumStart');
+  }
+  if(wizardStep === 5){ finishWizard(); return; }
+  wizardStep += 1; render();
+}
+
+function validateWizardStep(n){
+  if(n === 1){
+    const req = ['w_monteurNaam','w_projectManagerEmail','w_datumStart','w_datumEind'];
+    let ok = true, firstInvalid = null;
+    req.forEach(id => {
+      const el = document.getElementById(id);
+      const empty = !el.value.trim();
+      el.classList.toggle('invalid', empty);
+      if(empty){ ok = false; if(!firstInvalid) firstInvalid = el; }
+    });
+    if(ok&&val('w_datumEind')<val('w_datumStart')){ok=false;document.getElementById('w_datumEind').classList.add('invalid');}
+    document.getElementById('w1ErrorBanner').classList.toggle('show',!ok);
+    if(firstInvalid) firstInvalid.focus();
+    return ok;
+  }
+  if(n === 4){
+    const naamEl=document.getElementById('w_klantOndertekenaar');const ok=!!wizardSigData.monteur&&!!wizardSigData.klant&&!!naamEl?.value.trim();if(naamEl)naamEl.classList.toggle('invalid',!naamEl.value.trim());
+    document.getElementById('w4ErrorBanner').classList.toggle('show', !ok);
+    return ok;
+  }
+  return true;
+}
+
+function renderWizardStep1(c){
+  const p = wizardProject;
+  c.innerHTML = `
+    <p class="sub">Klant en adres komen uit het project. Vul jouw gegevens aan.</p>
+    <div class="error-banner" id="w1ErrorBanner">Vul de rood gemarkeerde velden in.</div>
+    <div class="detail-section"><div class="detail-row"><span>Klant</span><span>${escapeHtml(p.klantNaam)}</span></div><div class="detail-row"><span>Adres</span><span>${escapeHtml(p.adres)}</span></div></div>
+    <div class="field"><label>Jouw naam (VMI medewerker)</label><select id="w_monteurNaam"><option value="">Kies je naam...</option>${VMI_MEDEWERKERS.map(n=>`<option value="${n}" ${sessionMonteur.naam===n?'selected':''}>${n}</option>`).join('')}</select></div>
+    <div class="field"><label>E-mail projectmanager</label><input type="email" id="w_projectManagerEmail" value="${escapeHtml(p.projectManagerEmail||wizardMeta.projectManagerEmail||'-')}"></div>
+    <div class="field-row"><div class="field"><label>Van datum</label><input type="date" id="w_datumStart" value="${wizardMeta.datumStart||todayISO()}"></div><div class="field"><label>Tot datum</label><input type="date" id="w_datumEind" value="${wizardMeta.datumEind||todayISO()}"></div></div>
+  `;
+}
+
+function renderWizardStep2(c){
+  c.innerHTML = `
+    <p class="sub">Vink af wat is gedaan. Voeg eventueel opmerkingen of extra punten toe.</p>
+    <div id="wizChecklist"></div>
+    <div class="inline-add-row" id="wizAddRow" style="display:none;">
+      <input type="text" id="wizAddInput" placeholder="Omschrijving van het extra punt...">
+      <div class="row-btns"><button class="save-add" onclick="wizConfirmAdd()">Toevoegen</button><button class="cancel-add" onclick="wizCancelAdd()">Annuleren</button></div>
+    </div>
+    <button class="add-item-btn" id="wizAddBtn" onclick="wizShowAdd()">+ Eigen punt toevoegen</button>
+  `;
+  renderWizChecklist();
+}
+function renderWizChecklist(){
+  const wrap = document.getElementById('wizChecklist');
+  if(!wrap) return;
+  if(wizardChecklist.length === 0){
+    wrap.innerHTML = `<p style="font-size:13.5px; color:var(--text-mute);">Geen werkzaamheden vooraf ingevuld. Voeg hieronder punten toe.</p>`;
+    return;
+  }
+  wrap.innerHTML = wizardChecklist.map((item,i) => `
+    <div class="check-item ${item.checked?'checked':''}">
+      <div class="check-head" onclick="toggleWizCheck(${i})">
+        <div class="checkbox"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        <div class="check-text">${escapeHtml(item.text)}</div>
+      </div>
+      <div class="check-note-label">Opmerking (optioneel)</div>
+      <div class="check-note"><textarea onclick="event.stopPropagation()" oninput="wizardChecklist[${i}].note=this.value" placeholder="Bijv. reden indien niet uitgevoerd...">${escapeHtml(item.note)}</textarea></div>
+    </div>
+  `).join('');
+}
+function toggleWizCheck(i){ wizardChecklist[i].checked = !wizardChecklist[i].checked; renderWizChecklist(); }
+function wizShowAdd(){ document.getElementById('wizAddRow').style.display='block'; document.getElementById('wizAddBtn').style.display='none'; document.getElementById('wizAddInput').focus(); }
+function wizCancelAdd(){ document.getElementById('wizAddInput').value=''; document.getElementById('wizAddRow').style.display='none'; document.getElementById('wizAddBtn').style.display='block'; }
+function wizConfirmAdd(){
+  const input = document.getElementById('wizAddInput');
+  const text = input.value.trim();
+  if(text) wizardChecklist.push({ id:'c'+(wizardCustomCounter++), text, checked:false, note:'' });
+  renderWizChecklist();
+  wizCancelAdd();
+}
+
+function renderWizardStep3(c){
+  c.innerHTML = `
+    <p class="sub">Ruimte voor bijzonderheden, afwijkingen van het plan of afspraken met de klant.</p>
+    <div class="field"><label>Opmerkingen VMI medewerker (optioneel)</label><textarea id="w_algemeneOpmerkingen" rows="6" placeholder="Bijv. steiger blijft staan tot..." oninput="wizardVervolg.algemeneOpmerkingen=this.value">${escapeHtml(wizardVervolg.algemeneOpmerkingen||'')}</textarea></div>
+
+    <div class="field"><label>Opmerkingen van de klant (optioneel)</label><textarea id="w_opmerkingenKlant" rows="4" oninput="wizardVervolg.opmerkingenKlant=this.value">${escapeHtml(wizardVervolg.opmerkingenKlant||'')}</textarea></div>
+    <div class="section-label">Foto's werkzaamheden (optioneel, max. 6)</div>
+<div class="photo-grid" id="wizardPhotoGrid"></div>
+<div class="photo-add-btns">
+<button onclick="document.getElementById('wizardGalleryInput').click()">📁 Uit galerij</button>
+<button onclick="document.getElementById('wizardCameraInput').click()">📷 Foto maken</button>
+</div><input type="file" id="wizardGalleryInput" accept="image/*" multiple style="display:none" onchange="handleWizardPhotoInput(event)"><input type="file" id="wizardCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleWizardPhotoInput(event)">
+    <div class="section-label">Vervolg</div>
+    <div class="detail-section" style="padding:14px 16px;">
+      <label style="display:flex; align-items:flex-start; gap:9px; cursor:pointer; margin-bottom:10px;">
+        <input type="radio" name="w_afgerond" value="ja" ${wizardVervolg.afgerond==='ja'?'checked':''} onchange="wizardVervolg.afgerond='ja'" style="margin-top:3px; width:18px;height:18px;">
+        <span style="font-size:14.5px;">Project is afgerond — deze klus is helemaal klaar</span>
+      </label>
+      <label style="display:flex; align-items:flex-start; gap:9px; cursor:pointer;">
+        <input type="radio" name="w_afgerond" value="nee" ${wizardVervolg.afgerond==='nee'?'checked':''} onchange="wizardVervolg.afgerond='nee'" style="margin-top:3px; width:18px;height:18px;">
+        <span style="font-size:14.5px;">Er moet nog een keer teruggekomen worden — klus blijft openstaan</span>
+      </label>
+    </div>
+
+    <div class="field"><label>Openstaande acties (optioneel)</label><textarea id="w_openstaandeActies" rows="4" placeholder="Bijv. onderdeel nabestellen, vervolgafspraak inplannen..." oninput="wizardVervolg.openstaandeActies=this.value">${escapeHtml(wizardVervolg.openstaandeActies||'')}</textarea></div>
+    <div class="field">
+      <label style="display:flex; align-items:center; gap:9px; cursor:pointer;">
+        <input type="checkbox" id="w_actiesVerstuurd" style="width:19px;height:19px;" ${wizardVervolg.actiesVerstuurd?'checked':''} onchange="wizardVervolg.actiesVerstuurd=this.checked">
+        <span style="text-transform:none; font-size:14.5px; font-weight:600; color:var(--text);">Deze openstaande acties zijn al per mail / mondeling doorgegeven</span>
+      </label>
+    </div>
+  `;
+  renderWizardPhotoGrid();
+}
+
+function renderWizardPhotoGrid(){const g=document.getElementById('wizardPhotoGrid');if(!g)return;g.innerHTML=wizardFotos.map((src,i)=>`<div class="photo-thumb"><img src="${src}" loading="lazy" decoding="async" onclick="openLightbox(this.src)"><button class="rm" onclick="event.stopPropagation();wizardFotos.splice(${i},1);renderWizardPhotoGrid()">x</button></div>`).join('');}
+async function handleWizardPhotoInput(e){const fs=Array.from(e.target.files||[]);e.target.value='';for(const f of fs){if(wizardFotos.length>=6)break;try{wizardFotos.push(await compressImage(f));}catch(x){}}renderWizardPhotoGrid();}
+function renderWizardStep4(c){
+  c.innerHTML = `
+    <p class="sub">Onderteken beiden voor akkoord op de uitgevoerde werkzaamheden.</p>
+    <div class="error-banner" id="w4ErrorBanner">Beide handtekeningen en de naam van de klant zijn nodig voordat je verder kunt.</div>
+    <div class="sig-wrap"><div class="sig-title">VMI Medewerker</div><canvas class="pad" id="padMonteur"></canvas><div class="sig-actions"><span class="sig-hint">Teken met vinger of muis</span><button class="clear-btn" onclick="clearSig('padMonteur')">Wissen</button></div></div>
+    <div class="field"><label>Naam klant die ondertekent</label><input type="text" id="w_klantOndertekenaar" value="${escapeHtml(wizardMeta.klantOndertekenaar||'')}" oninput="wizardMeta.klantOndertekenaar=this.value"></div><div class="sig-wrap"><div class="sig-title">Klant (voor akkoord)</div><canvas class="pad" id="padKlant"></canvas><div class="sig-actions"><span class="sig-hint">Teken met vinger of muis</span><button class="clear-btn" onclick="clearSig('padKlant')">Wissen</button></div></div>
+  `;
+  setTimeout(setupCanvases, 30);
+}
+
+function renderWizardStep5(c){
+  const done = wizardChecklist.filter(i => i.checked).length;
+  c.innerHTML = `
+    <p class="sub">Laatste check voordat het document wordt aangemaakt en verstuurd.</p>
+    <div class="detail-section">
+      <h3>Opdracht</h3>
+      <div class="detail-row"><span>Klant</span><span>${escapeHtml(wizardProject.klantNaam)}</span></div>
+      <div class="detail-row"><span>Adres</span><span>${escapeHtml(wizardProject.adres)}</span></div>
+      <div class="detail-row"><span>Datum</span><span>${formatDateRange(wizardMeta.datumStart,wizardMeta.datumEind)}</span></div>
+      <div class="detail-row"><span>VMI medewerker</span><span>${escapeHtml(sessionMonteur.naam)}</span></div>
+    </div>
+    <div class="detail-section">
+      <h3>Checklist — ${done} van ${wizardChecklist.length} afgevinkt</h3>
+      <div class="task-list-view">${wizardChecklist.map(i => `<div class="${i.checked?'done-mark':'miss-mark'}">${i.checked?'✓':'○'} ${escapeHtml(i.text)}</div>`).join('') || '<span style="color:var(--text-mute);">Geen punten</span>'}</div>
+    </div>
+    <div class="detail-section">
+      <h3>Handtekeningen</h3>
+      <div class="detail-row"><span>VMI medewerker</span><span>${wizardSigData.monteur ? 'Getekend ✓' : 'Ontbreekt'}</span></div>
+      <div class="detail-row"><span>Klant</span><span>${wizardSigData.klant ? 'Getekend ✓' : 'Ontbreekt'}</span></div>
+    </div>
+    <div class="detail-section">
+      <h3>Vervolg</h3>
+      <div class="detail-row"><span>Status</span><span>${wizardVervolg.afgerond==='ja' ? 'Project afgerond' : 'Nog een bezoek nodig'}</span></div>
+      ${wizardVervolg.openstaandeActies ? `<div class="detail-row"><span>Openstaande actie</span><span>${escapeHtml(wizardVervolg.openstaandeActies)}</span></div><div class="detail-row"><span>Per mail verstuurd</span><span>${wizardVervolg.actiesVerstuurd ? 'Ja' : 'Nog niet'}</span></div>` : ''}
+    </div>
+    <div class="detail-section">
+      <h3>Wordt verstuurd naar</h3>
+      <div class="detail-row"><span>VMI medewerker</span><span>${escapeHtml(sessionMonteur.email)}</span></div>
+      <div class="detail-row"><span>Klant</span><span>${escapeHtml(wizardProject.contactEmail || '')}</span></div>
+    </div>
+  `;
+}
+
+/* ---- signature pads ---- */
+function setupCanvases(){
+  ['padMonteur','padKlant'].forEach(id => {
+    const canvas = document.getElementById(id);
+    if(!canvas) return;
+    const ratio = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * ratio; canvas.height = rect.height * ratio;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(ratio, ratio);
+    ctx.strokeStyle = '#0F1B2E'; ctx.lineWidth = 2.4; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    attachSigEvents(canvas, id);
+  });
+}
+function attachSigEvents(canvas, id){
+  const ctx = canvas.getContext('2d');
+  let drawing = false;
+  function pos(e){ const rect = canvas.getBoundingClientRect(); const p = e.touches ? e.touches[0] : e; return { x: p.clientX-rect.left, y: p.clientY-rect.top }; }
+  function start(e){ e.preventDefault(); drawing = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x,p.y); }
+  function move(e){ if(!drawing) return; e.preventDefault(); const p = pos(e); ctx.lineTo(p.x,p.y); ctx.stroke(); wizardSigData[id==='padMonteur'?'monteur':'klant'] = canvas.toDataURL('image/png'); }
+  function end(){ drawing = false; }
+  canvas.addEventListener('mousedown', start); canvas.addEventListener('mousemove', move); window.addEventListener('mouseup', end);
+  canvas.addEventListener('touchstart', start, {passive:false}); canvas.addEventListener('touchmove', move, {passive:false}); canvas.addEventListener('touchend', end);
+}
+function clearSig(id){
+  const canvas = document.getElementById(id);
+  canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  wizardSigData[id==='padMonteur'?'monteur':'klant'] = null;
+}
+
+/* ---- finish & send ---- */
+async function finishWizard(){
+  const nextBtn = document.getElementById('barNextBtn');
+  nextBtn.disabled = true; nextBtn.textContent = 'Bezig…';
+
+  const record = {
+    id: uid(),
+    projectId: wizardProject.id,
+    klantNaam: wizardProject.klantNaam,
+    adres: wizardProject.adres,
+    contactNaam: wizardProject.contactNaam,
+    datum:wizardMeta.datumStart,datumStart:wizardMeta.datumStart,datumEind:wizardMeta.datumEind,
+    monteurNaam: sessionMonteur.naam,
+    projectManagerNaam:wizardProject.projectManagerNaam,
+    projectManagerEmail:wizardMeta.projectManagerEmail,
+    checklist: wizardChecklist.map(i => ({ text:i.text, checked:i.checked, note:i.note })),
+    algemeneOpmerkingen:wizardVervolg.algemeneOpmerkingen,
+    opmerkingenKlant:wizardVervolg.opmerkingenKlant,
+    fotos:wizardFotos,
+    klantOndertekenaar:wizardMeta.klantOndertekenaar,
+    projectAfgerond: wizardVervolg.afgerond === 'ja',
+    openstaandeActies: wizardVervolg.openstaandeActies,
+    actiesVerstuurd: wizardVervolg.actiesVerstuurd,
+    sigMonteur: wizardSigData.monteur,
+    sigKlant: wizardSigData.klant,
+    completedAt: new Date().toISOString()
+  };
+
+  try{
+    await saveLogboekEntry(record);
+    // Bestaand project: alleen de status wijzigen -> bijwerken, niet opnieuw aanmaken.
+    const updatedProject = Object.assign({}, wizardProject, { status: wizardVervolg.afgerond === 'ja' ? 'afgerond' : 'open' });
+    await updateProject(updatedProject);
+  }catch(e){
+    nextBtn.disabled = false; nextBtn.textContent = 'Opnieuw proberen';
+    return;
+  }
+  showWizardSuccess();
+ 
+
+ /* aanmaak pdf in app blokkeren, wordtb in power automate gedaan -----------------------------------------------------------------------------------------
+ const doc = buildPdf(record);
+  const filename = `Opleverdocument_${record.klantNaam.replace(/[^a-z0-9]/gi,'_')}_${record.datum}.pdf`;
+  doc.save(filename);
+
+  const subject = encodeURIComponent(`Opleverdocument – ${record.klantNaam} – ${formatDate(record.datum)}`);
+  const body = encodeURIComponent(`Beste,\n\nBijgaand het opleverdocument van de werkzaamheden op ${record.adres}, uitgevoerd op ${formatDate(record.datum)}.\n\nVoeg het zojuist gedownloade PDF-bestand (${filename}) toe als bijlage voordat u dit bericht verstuurt.\n\nMet vriendelijke groet,\n${record.monteurNaam}`);
+
+------------------------------------------------------------------------------*/
+ /*  MAIL VERZENDEN BLOKKEREN ---------------------------------------------------------------------------------
+
+  window.location.href=`mailto:${encodeURIComponent(record.projectManagerEmail)}?subject=${subject}&body=${body}`;
+  showWizardSuccess();
+ ------------------------------------------------------------------*/
+}
+
+function showWizardSuccess(){
+  chrome({ title:'Voltooid', showLogo:true });
+  const c = document.getElementById('content');
+  c.innerHTML = `
+    <div class="success-wrap">
+      <div class="success-icon"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <h1 class="title" style="text-align:center;">PDF gereed</h1>
+      <p class="sub" style="text-align:center;">Het opleverdocument is geupload naar het logboek, en PDF wordt automatisch naar de projectmanager verzonden.</p>
+      <button class="btn primary" style="max-width:260px; margin:0 auto;" onclick="resetToHome()">Terug naar start</button>
+    </div>
+  `;
+}
+
+/* =========================================================
+   PDF BUILDER (herbruikbaar: bij opleveren én vanuit logboek)
+========================================================= */
+function buildPdf(record){
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'mm', format:'a4' });
+  const marginX = 18;
+  let y = 20;
+
+  doc.setFillColor(5,30,80);
+  doc.rect(0,0,210,30,'F');
+  try{ doc.addImage(document.getElementById('homeLogo').src, 'PNG', marginX, 8, 32, 13.85); }catch(e){}
+  doc.setTextColor(255,222,0); doc.setFont('helvetica','bold'); doc.setFontSize(15);
+  doc.text('OPLEVERDOCUMENT', 210-marginX, 18, {align:'right'});
+
+  y = 42; doc.setTextColor(15,27,46);
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text('Opdrachtgegevens', marginX, y); y += 6;
+  doc.setFont('helvetica','normal'); doc.setFontSize(10);
+  [['Klant',record.klantNaam],['Adres',record.adres],['Contactpersoon',record.contactNaam||'—'],['Periode',formatDateRange(record.datumStart||record.datum,record.datumEind||record.datum)],['VMI medewerker',record.monteurNaam]].forEach(([l,v]) => {
+    doc.setFont('helvetica','bold'); doc.text(l+':', marginX, y);
+    doc.setFont('helvetica','normal'); doc.text(String(v), marginX+38, y); y += 6;
+  });
+
+  y += 4; doc.setDrawColor(216,211,198); doc.line(marginX,y,210-marginX,y); y += 8;
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text('Uitgevoerde werkzaamheden', marginX, y); y += 7;
+
+  doc.setFontSize(9.5);
+  record.checklist.forEach(item => {
+    if(y > 265){ doc.addPage(); y = 20; }
+    doc.setFont('helvetica','bold');
+    doc.setTextColor(item.checked?30:190, item.checked?110:60, item.checked?60:40);
+    doc.text(item.checked ? '[X]' : '[ ]', marginX, y);
+    doc.setTextColor(15,27,46); doc.setFont('helvetica','normal');
+    const lines = doc.splitTextToSize(item.text, 150);
+    doc.text(lines, marginX+9, y); y += lines.length*5;
+    if(item.note && item.note.trim()){
+      doc.setFont('helvetica','italic'); doc.setFontSize(8.5); doc.setTextColor(90,100,105);
+      const noteLines = doc.splitTextToSize('Opmerking: '+item.note, 145);
+      doc.text(noteLines, marginX+9, y); y += noteLines.length*4.2;
+      doc.setFontSize(9.5); doc.setTextColor(15,27,46);
+    }
+    y += 2.5;
+  });
+
+  if(record.algemeneOpmerkingen && record.algemeneOpmerkingen.trim()){
+    if(y > 250){ doc.addPage(); y = 20; }
+    y += 4; doc.setDrawColor(216,211,198); doc.line(marginX,y,210-marginX,y); y += 8;
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(15,27,46);
+    doc.text('Algemene opmerkingen', marginX, y); y += 6;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+    const lines = doc.splitTextToSize(record.algemeneOpmerkingen, 174);
+    doc.text(lines, marginX, y); y += lines.length*5;
+  }
+
+  if(y > 240){ doc.addPage(); y = 20; }
+  y += 4; doc.setDrawColor(216,211,198); doc.line(marginX,y,210-marginX,y); y += 8;
+  if(!record.projectAfgerond){
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(15,27,46);
+    doc.text('Vervolg', marginX, y); y += 6;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+    const boxLines = doc.splitTextToSize('Er is nog een vervolgbezoek nodig om dit project af te ronden. Rubix neemt contact op om een nieuwe afspraak in te plannen.', 174);
+    doc.text(boxLines, marginX, y); y += boxLines.length*5 + 4;
+  } else {
+    doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(15,27,46);
+    doc.text('Status', marginX, y); y += 6;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+    doc.text('Dit project is afgerond. Er is geen vervolgbezoek gepland.', marginX, y); y += 8;
+  }
+  if(record.openstaandeActies && record.openstaandeActies.trim()){
+    if(y > 255){ doc.addPage(); y = 20; }
+    doc.setFont('helvetica','bold'); doc.setFontSize(10.5); doc.setTextColor(15,27,46);
+    doc.text('Openstaande actie(s)', marginX, y); y += 6;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+    const actLines = doc.splitTextToSize(record.openstaandeActies, 174);
+    doc.text(actLines, marginX, y); y += actLines.length*5 + 4;
+  }
+
+ /* if(record.fotos?.length){if(y>125){doc.addPage();y=20;}doc.setFont('helvetica','bold');doc.setFontSize(11);doc.text('Foto\'s werkzaamheden',marginX,y);y+=7;record.fotos.slice(0,6).forEach((src,i)=>{if(i>0&&i%4===0){doc.addPage();y=20;}const j=i%4,col=j%2,row=Math.floor(j/2);try{doc.addImage(src,'JPEG',marginX+col*88,y+row*48,82,44);}catch(e){}});y+=Math.ceil(Math.min(record.fotos.length,4)/2)*48;}*/
+
+
+const fotos = Array.isArray(record.fotos)
+    ? record.fotos
+    : (
+        typeof record.fotos === 'string' &&
+        record.fotos !== '-' &&
+        record.fotos.trim() !== ''
+    )
+        ? [record.fotos]
+        : [];
+
+if (fotos.length) {
+
+    if (y > 125) {
+        doc.addPage();
+        y = 20;
+    }
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.text("Foto's werkzaamheden", marginX, y);
+    y += 7;
+
+    fotos.slice(0, 6).forEach((src, i) => {
+
+        if (i > 0 && i % 4 === 0) {
+            doc.addPage();
+            y = 20;
+        }
+
+        const col = i % 2;
+        const row = Math.floor((i % 4) / 2);
+
+        const imgX = marginX + (col * 90);
+        const imgY = y + (row * 60);
+
+        try {
+            doc.addImage(
+                src,
+                'JPEG',
+                imgX,
+                imgY,
+                80,
+                50
+            );
+        } catch (e) {
+            console.error('Foto toevoegen mislukt:', e);
+        }
+
+    });
+
+    y += Math.ceil(Math.min(fotos.length, 4) / 2) * 60;
+}
+
+        
+
+
+
+
+  doc.setDrawColor(216,211,198); doc.line(marginX,y,210-marginX,y); y += 10;
+  doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text('Voor akkoord ondertekend', marginX, y); y += 8;
+
+  const sigW = 78, sigH = 30;
+  if(record.sigMonteur) doc.addImage(record.sigMonteur, 'PNG', marginX, y, sigW, sigH);
+  if(record.sigKlant) doc.addImage(record.sigKlant, 'PNG', marginX+96, y, sigW, sigH);
+  y += sigH+3;
+  doc.setDrawColor(15,27,46); doc.line(marginX,y,marginX+sigW,y); doc.line(marginX+96,y,marginX+96+sigW,y); y += 5;
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.text('Monteur: '+record.monteurNaam, marginX, y);
+  doc.text('Klant: '+(record.klantOndertekenaar||record.klantNaam),marginX+96,y);
+
+  return doc;
+}
+
+/* =========================================================
+   LOGBOEK
+========================================================= */
+let logboekFilter = { search:'', status:'alle' };
+
+async function renderLogboekList(c){
+  chrome({ title:'Logboek', sub:'Projectgeschiedenis' });
+  c.innerHTML = `
+    <div class="field"><label>Zoek op klant</label><input type="text" id="logSearchInput" value="${escapeHtml(logboekFilter.search)}" placeholder="Klantnaam..." oninput="onLogSearchInput(this.value)"></div>
+    <div class="chip-row">
+      <button class="chip" onclick="setLogStatusFilter('open')">Open</button>
+      <button class="chip" onclick="setLogStatusFilter('afgerond')">Afgerond</button>
+      <button class="chip" onclick="setLogStatusFilter('alle')">Alles</button>
+    </div>
+    <div id="logListBody"><div class="loading-txt">Logboek laden…</div></div>`;
+  await loadLogboekList();
+}
+const debouncedLogSearch=debounce(v=>{logboekFilter.search=v;loadLogboekList();},300);
+function onLogSearchInput(v){debouncedLogSearch(v);}
+function setLogStatusFilter(s){ logboekFilter.status = s; loadLogboekList(); }
+
+async function loadLogboekList(){
+  const body = document.getElementById('logListBody');
+  if(!body) return;
+  try{
+    const [projects, entries] = await Promise.all([getProjects(), getLogboek()]);
+    const byProject = {};
+    entries.forEach(e => { (byProject[e.projectId] = byProject[e.projectId] || []).push(e); });
+    let rows = Object.keys(byProject).map(pid => {
+      const proj = projects.find(p => p.id === pid);
+      const visits = byProject[pid].slice().sort((a,b) => b.completedAt.localeCompare(a.completedAt));
+      const status = proj ? proj.status : (visits[0].projectAfgerond ? 'afgerond' : 'open');
+      return { projectId: pid, klantNaam: visits[0].klantNaam, adres: visits[0].adres, status, visits };
+    });
+    if(logboekFilter.status !== 'alle') rows = rows.filter(r => r.status === logboekFilter.status);
+    const s = logboekFilter.search.trim().toLowerCase();
+    if(s) rows = rows.filter(r => r.klantNaam.toLowerCase().includes(s));
+    rows.sort((a,b) => b.visits[0].completedAt.localeCompare(a.visits[0].completedAt));
+
+    if(rows.length === 0){
+      body.innerHTML = `<div class="empty-state"><div class="ic">📒</div><p>Geen resultaten gevonden.</p></div>`;
+      return;
+    }
+    body.innerHTML = rows.map(r => `
+      <div class="log-card" onclick="setView('logboekDetail', {projectId:'${r.projectId}'})">
+        <div class="pc-top"><div><div class="pc-name">${escapeHtml(r.klantNaam)}</div><div class="pc-addr">${escapeHtml(r.adres)}</div></div><span class="badge ${r.status==='afgerond'?'done':'open'}">${r.status==='afgerond'?'Afgerond':'Open'}</span></div>
+        <div class="pc-meta">${r.visits.length} bezoek${r.visits.length>1?'en':''} · laatste: ${formatDate(r.visits[0].datum)}</div>
+      </div>
+    `).join('');
+  }catch(e){
+    body.innerHTML = `<div class="empty-state"><div class="ic">⚠️</div><p>Kon logboek niet laden.</p></div>`;
+  }
+}
+
+
+async function renderLogboekDetail(c){
+  chrome({ title:'Projectgeschiedenis', sub:'Logboek' });
+
+  c.innerHTML = `<div class="loading-txt">Laden…</div>`;
+
+  const entries = (await getLogboek())
+    .filter(e => e.projectId === VIEWPARAMS.projectId)
+    .sort((a,b) => b.completedAt.localeCompare(a.completedAt));
+
+  if(entries.length === 0){
+    c.innerHTML = `
+      <div class="empty-state">
+        <div class="ic">⚠️</div>
+        <p>Niet gevonden.</p>
+      </div>
+    `;
+    return;
+  }
+
+  let project = null;
+  try{
+    project = await getProjectById(VIEWPARAMS.projectId);
+  }catch(e){}
+
+  const status = project
+    ? project.status
+    : (entries[0].projectAfgerond ? 'afgerond' : 'open');
+
+  const allLogboekFotos = entries.flatMap(e => parseArray(e.fotos));
+
+  c.innerHTML = `
+    <h1 class="title">${escapeHtml(entries[0].klantNaam)}</h1>
+
+    <p class="sub">
+      ${escapeHtml(entries[0].adres)}
+      —
+      <span class="badge ${status==='afgerond' ? 'done' : 'open'}">
+        ${status==='afgerond' ? 'Afgerond' : 'Open'}
+      </span>
+    </p>
+
+    ${project?.fotos?.length ? `
+      <div class="detail-section">
+        <h3>Foto's vooraf (${project.fotos.length})</h3>
+
+        <div class="photo-grid">
+          ${project.fotos.map(src => `
+            <div class="photo-thumb">
+              <img src="${src}" loading="lazy" decoding="async">
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
+
+    ${allLogboekFotos.length ? `
+      <div class="detail-section">
+        <h3>Alle logboekfoto's (${allLogboekFotos.length})</h3>
+
+        <div class="photo-grid">
+          ${allLogboekFotos.map(src => `
+            <div class="photo-thumb">
+              <img src="${src}" loading="lazy" decoding="async">
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    ` : ''}
+
+    <div class="section-label">Bezoeken (${entries.length})</div>
+    <div class="visits-container">
+    ${entries.map(rec => `
+      <div class="detail-section">
+
+        <h3>
+          ${formatDate(rec.datum)}
+          —
+          ${escapeHtml(rec.monteurNaam)}
+        </h3>
+
+        <div class="task-list-view">
+          ${(rec.checklist || []).map(i => `
+            <div class="${i.checked ? 'done-mark' : 'miss-mark'}">
+              ${i.checked ? '✓' : '○'}
+              ${escapeHtml(i.text)}
+              ${i.note ? ` — <em>${escapeHtml(i.note)}</em>` : ''}
+            </div>
+          `).join('')}
+        </div>
+
+        ${rec.algemeneOpmerkingen ? `
+          <p style="font-size:13.5px;margin:10px 0 0;">
+            <b>Opmerkingen VMI:</b>
+            ${escapeHtml(rec.algemeneOpmerkingen)}
+          </p>
+        ` : ''}
+
+        ${rec.opmerkingenKlant ? `
+          <p style="font-size:13.5px;margin:8px 0 0;">
+            <b>Opmerkingen klant:</b>
+            ${escapeHtml(rec.opmerkingenKlant)}
+          </p>
+        ` : ''}
+
+        ${rec.klantOndertekenaar ? `
+          <p style="font-size:13.5px;margin:8px 0 0;">
+            <b>Ondertekend door:</b>
+            ${escapeHtml(rec.klantOndertekenaar)}
+          </p>
+        ` : ''}
+
+        ${parseArray(rec.fotos).length ? `
+          <h3 style="margin-top:15px;">
+            Foto's bezoek (${parseArray(rec.fotos).length})
+          </h3>
+
+          <div class="photo-grid">
+            ${parseArray(rec.fotos).map(src => `
+              <div class="photo-thumb">
+                <img src="${src}" loading="lazy" decoding="async">
+            </div>
+            `).join('')}
+          </div>
+        ` : ''}
+
+        ${rec.openstaandeActies ? `
+          <p style="font-size:13.5px; margin-top:8px; color:var(--safety-dark);">
+            <b>Openstaande actie:</b>
+            ${escapeHtml(rec.openstaandeActies)}
+            (${rec.actiesVerstuurd ? 'per mail verstuurd' : 'nog niet verstuurd'})
+          </p>
+        ` : ''}
+
+        <div class="detail-row" style="margin-top:8px;">
+          <span>Resultaat</span>
+          <span>
+            ${rec.projectAfgerond
+              ? 'Project afgerond'
+              : 'Vervolgbezoek nodig'}
+          </span>
+        </div>
+
+${rec.sigMonteur ? `
+  <div style="margin-top:10px;">
+    <b>Handtekening monteur</b><br>
+    <img class="ov-sig-img" loading="lazy" decoding="async"
+         src="${escapeHtml(fixSignature(rec.sigMonteur))}"
+         alt="Handtekening monteur"
+         onclick="openLightbox(this.src)">
+  </div>
+` : ''}
+
+${rec.sigKlant ? `
+  <div style="margin-top:10px;">
+    <b>Handtekening klant</b><br>
+    <img class="ov-sig-img" loading="lazy" decoding="async"
+         src="${escapeHtml(fixSignature(rec.sigKlant))}"
+         alt="Handtekening klant"
+         onclick="openLightbox(this.src)">
+  </div>
+` : ''}
+
+        <button
+          class="small-btn"
+          style="margin-top:10px;width:100%;"
+          onclick="redownloadPdf('${rec.id}')">
+          PDF downloaden
+        </button>
+
+      </div>
+    `).join('')}
+    </div>
+  `;
+}
+
+
+
+function fixSignature(sig){
+    if(!sig) return '';
+    const value = String(sig).trim();
+
+    if(/^https?:\/\//i.test(value)) return value;
+    if(/^data:image\//i.test(value)) return value;
+
+    return 'data:image/png;base64,' + value;
+}
+
+
+async function redownloadPdf(id){
+
+    try{
+
+        const r = await apiCall('getLogboekItem', {
+            id: id
+        });
+
+        const rec = r?.body?.entry || r?.entry;
+
+        if(!rec){
+            throw new Error('Logboekitem niet gevonden');
+        }
+
+        rec.sigMonteur = fixSignature(rec.sigMonteur);
+        rec.sigKlant   = fixSignature(rec.sigKlant);
+
+        if(typeof rec.checklist === 'string'){
+            rec.checklist = JSON.parse(rec.checklist);
+        }
+if(typeof rec.fotos === 'string'){
+    try{
+        rec.fotos = JSON.parse(rec.fotos);
+    }catch{
+        rec.fotos =
+            rec.fotos === '-' || !rec.fotos
+                ? []
+                : [rec.fotos];
+    }
+}
+
+        const doc = buildPdf(rec);
+
+        doc.save(
+            `OpleverdocumentCopy_${rec.klantNaam}_${rec.datum}.pdf`
+        );
+
+    }catch(e){
+
+        console.error(
+            'PDF opnieuw downloaden is mislukt:',
+            e
+        );
+
+        alert(
+            'PDF genereren mislukt. Bekijk Console (F12).'
+        );
+    }
+}
+
+
+
+/* =========================================================
+   INIT
+========================================================= */
+(async () => {
+  VIEW = 'splash';
+  APP_READY = false;
+  render();
+
+  console.log('INIT: start laden medewerkersplanning');
+
+  try {
+    await loadKalender();
+    console.log('INIT: medewerkersplanning geladen:', KALENDER_DATA.length);
+  } catch (e) {
+    console.error('INIT: medewerkersplanning laden mislukt:', e);
+  } finally {
+    APP_READY = true;
+    render();
+  }
+})();
+</script>
+</body>
+</html>
